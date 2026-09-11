@@ -3839,13 +3839,15 @@ function ddzApplyMove(owner, cards, p){
 }
 /* 本地玩家点击出牌 */
 function ddzLocalPlay(){
-  if(!G.ddz || G.ddz.phase!=='playing' || ddzMySide()!==0) return;
+  if(!G.ddz){ toast('牌局未开始'); return; }
+  if(G.ddz.phase!=='playing'){ toast('牌局已结束'); return; }
+  if(ddzMySide()!==0){ toast('还没轮到你出牌'); return; }
   const sel=[...ddzSel].sort((a,b)=>a-b);
   if(!sel.length){ toast('请先选择要出的牌'); return; }
   const hand = ddzMyHand();
   const cards = sel.map(i=>hand[i]);
   const p = ddzParse(cards);
-  if(!p){ toast('不是合法牌型'); return; }
+  if(!p){ toast('不是合法牌型（单张/对子/三张/三带一/三带二/顺子/炸弹/王炸）'); return; }
   if(G.ddz.last && G.ddz.last.owner===1 && G.ddz.last.type && !ddzBeats(G.ddz.last, p)){ toast('压不过对方的牌'); return; }
   ddzSel.clear();
   ddzApplyMove(0, cards, p);
@@ -3860,13 +3862,16 @@ function ddzLocalPass(){
 }
 /* guest 点击出牌/过牌（发指令，等主机广播） */
 function ddzGuestPlay(){
-  if(!netIsGuest() || !G.ddz || G.ddz.phase!=='playing' || G.ddz.turn!==1) return;
+  if(!netIsGuest()){ toast('仅客户端可用'); return; }
+  if(!G.ddz){ toast('牌局未开始'); return; }
+  if(G.ddz.phase!=='playing'){ toast('牌局已结束'); return; }
+  if(G.ddz.turn!==1){ toast('还没轮到你出牌'); return; }
   const sel=[...ddzSel].sort((a,b)=>a-b);
   if(!sel.length){ toast('请先选择要出的牌'); return; }
   const hand = ddzMyHand();
   const cards = sel.map(i=>hand[i]);
   const p = ddzParse(cards);
-  if(!p){ toast('不是合法牌型'); return; }
+  if(!p){ toast('不是合法牌型（单张/对子/三张/三带一/三带二/顺子/炸弹/王炸）'); return; }
   if(G.ddz.last && G.ddz.last.owner===0 && G.ddz.last.type && !ddzBeats(G.ddz.last, p)){ toast('压不过对方的牌'); return; }
   ddzSel.clear();
   netSendOp('ddz_play', { cards: cards.map(c=>[c.v,c.s]) });
@@ -5715,9 +5720,17 @@ function applyState(s){
   G.netFx = fx;
   renderAll();
   if(s.winner!==null){ endGame(); return; }
+  // 客户端日志：不清空，只追加新增的（去重，避免重复渲染）
+  G._clientLogSig = G._clientLogSig || new Set();
   const lg = $('#log');
-  if(lg) lg.innerHTML='';
-  for(const L of logs) log(L.m, L.c);
+  for(const L of logs){
+    const sig = L.m + '|' + (L.c||'');
+    if(G._clientLogSig.has(sig)) continue;
+    G._clientLogSig.add(sig);
+    log(L.m, L.c);
+  }
+  // 限制签名集合大小，防止内存泄漏
+  if(G._clientLogSig.size > 200){ G._clientLogSig = new Set([...G._clientLogSig].slice(-100)); }
   showBuddhaMark(!!(G.players[P].qianshou && G.players[P].qianshou.active));
   for(const f of fx) playNetFx(f);
   G.netFx = null;
