@@ -1630,7 +1630,12 @@ const ART = {
   hell:'https://aka.doubaocdn.com/s/zDWz2PiiKZ',
   arrogant:'https://aka.doubaocdn.com/s/KFVRPq0JKB',
   arrogant_dragon:'https://aka.doubaocdn.com/s/NVPK8LULLI',
-  holo_arrogant_dragon:'https://aka.doubaocdn.com/s/RtYDSvUFrz'
+  holo_arrogant_dragon:'https://aka.doubaocdn.com/s/RtYDSvUFrz',
+  /* 缺失卡面补全（别名映射，确保所有卡牌都有卡面显示） */
+  dalong:'https://aka.doubaocdn.com/s/GedtSVc79Y',
+  ddz:'https://aka.doubaocdn.com/s/7us8wAER8G',
+  saguros_mon:'https://aka.doubaocdn.com/s/YngOc6IAAv',
+  holo_saguros_mon:'https://aka.doubaocdn.com/s/ezxKH8ShIP'
 };
 
 /* 10 种怪兽（每种 3 张），hp 为固定生命值 */
@@ -5723,8 +5728,16 @@ function netFxHolo(art){
   G.net.fx.push({ kind:'holo', art });
 }
 function flipView(s){
-  return s.replace(/对手的/g,'\u0001').replace(/你的/g,'对手的').replace(/\u0001/g,'你的')
-          .replace(/对手/g,'\u0002').replace(/你/g,'对手').replace(/\u0002/g,'你');
+  // 用四个独立占位符，先全部替换为占位符再统一换回，避免"你的"与"你"重复匹配
+  return s
+    .replace(/你的/g,'\u0001')
+    .replace(/对手的/g,'\u0002')
+    .replace(/你/g,'\u0003')
+    .replace(/对手/g,'\u0004')
+    .replace(/\u0001/g,'对手的')
+    .replace(/\u0002/g,'你的')
+    .replace(/\u0003/g,'对手')
+    .replace(/\u0004/g,'你');
 }
 /* 客户端：应用主机广播的状态（反转槽位：客户端视角自己是 P=0） */
 function applyState(s){
