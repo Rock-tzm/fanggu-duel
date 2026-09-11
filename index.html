@@ -618,11 +618,11 @@ button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
   background:var(--panel); border:1px solid var(--line);
   min-height:22px; flex:0 0 auto;
 }
-#log{ flex:1; font-size:11.5px; line-height:1.35; max-height:48px; overflow-y:auto; scrollbar-width:thin; overscroll-behavior:contain; }
+#log{ flex:1; font-size:11.5px; line-height:1.4; max-height:110px; overflow-y:auto; scrollbar-width:thin; overscroll-behavior:contain; padding:3px 6px; }
 #log::-webkit-scrollbar{ width:7px; }
 #log::-webkit-scrollbar-track{ background:rgba(0,0,0,.15); border-radius:4px; }
 #log::-webkit-scrollbar-thumb{ background:var(--line-2); border-radius:4px; }
-#log:hover{ max-height:150px; }
+#log:hover{ max-height:220px; }
 #log .msg{ color:var(--txt); }
 #log .msg.phase{ color:var(--accent); font-weight:700; }
 #log .msg.trap{ color:var(--trap); }
@@ -4546,6 +4546,14 @@ function holoImgUrl(card){
   return ART.cardback;
 }
 function fxHolo(owner, slot, card, tone, zone){
+  // 主机端：自动记录投影特效，广播给客户端（所有 fxHolo 调用点自动同步）
+  if(netIsHost()){
+    G.net.fx = G.net.fx || [];
+    G.net.fx.push({
+      kind:'holo', owner, slot, tone, zone: zone||'mz',
+      card: card ? { id:card.id, name:card.name, type:card.type, fused:!!card.fused } : null
+    });
+  }
   const zz = zone || 'mz';
   const el = document.querySelector(`.zone[data-p="${owner}"][data-zone="${zz}"][data-slot="${slot}"]`);
   const layer = $('#holo-layer');
@@ -4748,6 +4756,7 @@ async function resolveAttack(aOwner, aSlot, target){
         if(revived){
           renderAll(); await sleep(600);
           log(`「${defM.name}」剩余生命 ${defM.hp}`,'msg');
+          netLog(`「${defM.name}」剩余生命 ${defM.hp}`,'msg');
           renderAll(); await sleep(400);
           G.busy=false; renderAll();
           if(!G.winner){ await autoNecro(P); await autoNecro(AI); }
@@ -4759,6 +4768,7 @@ async function resolveAttack(aOwner, aSlot, target){
       pushGraveMon(1-aOwner, defM);
       opp.mz[target.slot] = null;
       log(`「${defM.name}」被消灭！`,'dmg');
+      netLog(`「${defM.name}」被消灭！`,'dmg');
       // 高亮伤害陷阱：守方对战区覆盖的陷阱自动发动
       const defOwner = 1-aOwner;
       if(overflow>0 && trapInZone(defOwner,'flash_damage')){
@@ -4768,6 +4778,7 @@ async function resolveAttack(aOwner, aSlot, target){
         const trSlot = G.players[defOwner].traps.findIndex(t=>!t);
         fxHolo(defOwner, Math.max(0,trSlot), cardById('flash_damage'), 'bad', 'trap');
         log('「高亮伤害」发动：覆盖的陷阱自动生效，攻击怪兽被消灭，伤害未延伸！','trap');
+        netLog('「高亮伤害」发动：覆盖的陷阱自动生效，攻击怪兽被消灭，伤害未延伸！','trap');
         renderAll();
         if(checkWin()){ endGame(); } else { G.busy=false; renderAll(); if(!G.winner){ await autoNecro(P); await autoNecro(AI); } }
         return;
@@ -4775,6 +4786,7 @@ async function resolveAttack(aOwner, aSlot, target){
       if(overflow>0){
         G.players[defOwner].lp -= overflow;
         log(`${overflow} 点伤害延伸到${defOwner===P?'你':'对手'}的生命值！`,'dmg');
+        netLog(`${overflow} 点伤害延伸到${defOwner===P?'你':'对手'}的生命值！`,'dmg');
       }
       renderAll();
       await sleep(500);
@@ -4784,6 +4796,7 @@ async function resolveAttack(aOwner, aSlot, target){
       return;
     }else{
       log(`「${defM.name}」剩余生命 ${defM.hp}`,'msg');
+      netLog(`「${defM.name}」剩余生命 ${defM.hp}`,'msg');
       renderAll();
       await sleep(400);
       G.busy=false; renderAll();
@@ -4809,8 +4822,10 @@ async function resolveAttack(aOwner, aSlot, target){
           pushGraveMon(1-aOwner, defM);
           opp.mz[target.slot] = null;
           log(`「${defM.name}」被消灭！`,'dmg');
+          netLog(`「${defM.name}」被消灭！`,'dmg');
         }else{
           log(`「${defM.name}」剩余生命 ${defM.hp}`,'msg');
+          netLog(`「${defM.name}」剩余生命 ${defM.hp}`,'msg');
         }
         renderAll();
         await sleep(400);
@@ -4818,6 +4833,7 @@ async function resolveAttack(aOwner, aSlot, target){
         pushGraveMon(1-aOwner, defM);
         opp.mz[target.slot] = null;
         log(`「${defM.name}」被消灭！`,'dmg');
+        netLog(`「${defM.name}」被消灭！`,'dmg');
         renderAll();
         await sleep(300);
       }
@@ -4827,6 +4843,7 @@ async function resolveAttack(aOwner, aSlot, target){
       if(counter > 0){
         atkM.hp -= counter;
         log(`「${defM.name}」反击！「${atkM.name}」受到 ${counter} 点伤害`,'dmg');
+        netLog(`「${defM.name}」反击！「${atkM.name}」受到 ${counter} 点伤害`,'dmg');
         renderAll();
         await sleep(500);
         if(atkM.hp <= 0){
@@ -4837,17 +4854,21 @@ async function resolveAttack(aOwner, aSlot, target){
               pushGraveMon(aOwner, atkM);
               me.mz[aSlot] = null;
               log(`「${atkM.name}」被反击消灭！`,'dmg');
+              netLog(`「${atkM.name}」被反击消灭！`,'dmg');
             }else{
               log(`「${atkM.name}」剩余生命 ${atkM.hp}`,'msg');
+              netLog(`「${atkM.name}」剩余生命 ${atkM.hp}`,'msg');
             }
           }else{
             pushGraveMon(aOwner, atkM);
             me.mz[aSlot] = null;
             log(`「${atkM.name}」被反击消灭！`,'dmg');
+            netLog(`「${atkM.name}」被反击消灭！`,'dmg');
           }
         }
       }else{
         log(`「${defM.name}」反击未能破防（攻${defM.atk} vs 守${atkM.def}）`,'msg');
+        netLog(`「${defM.name}」反击未能破防（攻${defM.atk} vs 守${atkM.def}）`,'msg');
       }
       renderAll();
       await sleep(400);
@@ -5755,14 +5776,19 @@ function playNetFx(f){
       setTimeout(()=>{ if(dmgEl.parentNode) dmgEl.parentNode.removeChild(dmgEl); }, 1150);
     }
   }else if(f.kind==='holo'){
-    // 投影类：在目标格上方闪现立体虚影
-    const el = $('#holo-layer');
-    if(!el) return;
-    const img = document.createElement('img');
-    img.src = f.art || ART.ghost;
-    img.style.cssText='position:absolute;left:50%;top:48%;transform:translate(-50%,-50%) scale(.7);height:180px;z-index:60;opacity:.95;filter:drop-shadow(0 0 22px rgba(90,180,255,.85));animation:holoFlash 1.2s ease forwards;pointer-events:none;';
-    el.appendChild(img);
-    setTimeout(()=>{ if(img.parentNode) img.parentNode.removeChild(img); }, 1250);
+    // 客户端：播放完整立体投影动画（与主机端一致，含四段时间轴/全息材质/专属动作/命中爆点）
+    if(f.card){
+      fxHolo(f.owner, f.slot, f.card, f.tone, f.zone);
+    }else if(f.art){
+      // 兼容旧格式（只有art）
+      const el = $('#holo-layer');
+      if(!el) return;
+      const img = document.createElement('img');
+      img.src = f.art || ART.ghost;
+      img.style.cssText='position:absolute;left:50%;top:48%;transform:translate(-50%,-50%) scale(.7);height:180px;z-index:60;opacity:.95;filter:drop-shadow(0 0 22px rgba(90,180,255,.85));animation:holoFlash 1.2s ease forwards;pointer-events:none;';
+      el.appendChild(img);
+      setTimeout(()=>{ if(img.parentNode) img.parentNode.removeChild(img); }, 1250);
+    }
   }else if(f.kind==='log'){
     if(f.msg) log(f.msg, f.c);
   }
