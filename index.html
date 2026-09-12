@@ -720,7 +720,7 @@ button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 #ab-btns button:disabled{ opacity:.4; cursor:default; }
 
 /* 弹窗（层级需高于骰子蒙层 210，以支持开局掷骰时使用强运卡） */
-#modal-root{ position:fixed; inset:0; z-index:220; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+#modal-root{ position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; pointer-events:none; }
 .modal-mask{ position:absolute; inset:0; background:rgba(30,60,120,.35); backdrop-filter:blur(3px); pointer-events:auto; }
 .modal{
   position:relative; z-index:2; width:min(520px,92vw); max-height:82vh; overflow:auto;
@@ -1375,6 +1375,7 @@ body.dragging{ user-select:none; }
    ============================================================ */
 #deck-select-overlay{ position:fixed; inset:0; z-index:500; background:rgba(10,15,30,.92); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; }
 #deck-select-overlay.hidden{ display:none; }
+.ds-container{ display:flex; gap:12px; width:min(1240px,97vw); height:min(760px,94vh); max-height:94vh; }
 .ds-box{ width:96vw; max-width:1400px; height:92vh; background:linear-gradient(160deg,#1a2340,#0f1528); border:1px solid rgba(120,160,255,.3); border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.6); }
 .ds-header{ padding:14px 20px 10px; border-bottom:1px solid rgba(120,160,255,.15); }
 .ds-header h2{ margin:0; font-size:20px; color:#e8f0ff; }
@@ -1389,11 +1390,16 @@ body.dragging{ user-select:none; }
 .ds-card{ width:62px; height:86px; border-radius:6px; overflow:hidden; border:1.5px solid rgba(120,160,255,.25); cursor:grab; position:relative; flex:0 0 auto; transition:transform .15s, box-shadow .15s; background:#1a2340; }
 .ds-card:hover{ transform:translateY(-3px) scale(1.06); box-shadow:0 4px 14px rgba(100,150,255,.4); z-index:5; }
 .ds-card img{ width:100%; height:100%; object-fit:cover; display:block; }
-.ds-card .ds-card-name{ position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,.85)); color:#fff; font-size:8px; padding:8px 2px 2px; text-align:center; line-height:1.1; }
+.ds-card .ds-card-name{ position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,.92) 40%); color:#fff; font-size:9.5px; font-weight:600; padding:14px 3px 3px; text-align:center; line-height:1.15; text-shadow:0 1px 2px rgba(0,0,0,.8); z-index:2; pointer-events:none; }
+.ds-card .ds-card-stats{ z-index:3; pointer-events:none; }
+.ds-card img{ pointer-events:none; }
 .ds-card .ds-card-stats{ position:absolute; top:1px; left:2px; right:2px; display:flex; justify-content:space-between; font-size:7.5px; color:#fff; text-shadow:0 0 3px #000; font-weight:700; }
 .ds-card.selected{ border-color:#ffd700; box-shadow:0 0 8px rgba(255,215,0,.5); opacity:.4; }
 .ds-card.dragging{ opacity:.5; }
-.ds-mine{ width:300px; flex:0 0 300px; background:rgba(15,22,42,.8); border:1px solid rgba(120,160,255,.2); border-radius:10px; display:flex; flex-direction:column; overflow:hidden; }
+.ds-mine{ width:300px; flex:0 0 300px; background:rgba(15,22,42,.8); border:1px solid rgba(120,160,255,.2); border-radius:10px; display:flex; flex-direction:column; overflow:hidden; max-height:100%; }
+.ds-mine-scroll{ flex:1; overflow-y:auto; overflow-x:hidden; min-height:0; }
+.ds-mine-scroll::-webkit-scrollbar{ width:5px; }
+.ds-mine-scroll::-webkit-scrollbar-thumb{ background:rgba(120,160,255,.3); border-radius:3px; }
 .ds-mine.drag-over{ border-color:#4ade80; box-shadow:0 0 16px rgba(74,222,128,.4); }
 .ds-mine-title{ padding:8px 12px; font-size:13px; font-weight:700; color:#e8f0ff; background:rgba(40,60,100,.3); border-bottom:1px solid rgba(120,160,255,.15); }
 .ds-mine-section{ padding:6px 8px; border-bottom:1px solid rgba(120,160,255,.08); }
@@ -1404,11 +1410,19 @@ body.dragging{ user-select:none; }
 .ds-mine-card .ds-remove{ position:absolute; top:-4px; right:-4px; width:16px; height:16px; background:#ef4444; color:#fff; border-radius:50%; font-size:11px; line-height:16px; text-align:center; cursor:pointer; display:none; }
 .ds-mine-card:hover .ds-remove{ display:block; }
 .ds-summary{ padding:8px 12px; font-size:11.5px; color:#a8c0f0; border-top:1px solid rgba(120,160,255,.15); text-align:center; }
-.ds-btns{ padding:8px 12px 12px; display:flex; gap:8px; }
+.ds-btns{ padding:8px 12px 12px; display:flex; gap:8px; flex:0 0 auto; }
 .ds-btn{ flex:1; padding:8px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; background:linear-gradient(135deg,#4a7fff,#3060e0); color:#fff; transition:transform .1s, box-shadow .1s; }
 .ds-btn:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(74,127,255,.4); }
 .ds-btn.alt{ background:rgba(60,80,120,.5); color:#a8c0f0; }
 .ds-btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+.ds-log-box{ margin:0 12px 8px; border:1px solid rgba(120,160,255,.15); border-radius:8px; overflow:hidden; background:rgba(0,0,0,.2); flex:0 0 auto; }
+.ds-log-header{ display:flex; justify-content:space-between; align-items:center; padding:4px 8px; background:rgba(40,60,100,.3); border-bottom:1px solid rgba(120,160,255,.1); }
+.ds-log-header span{ font-size:11px; color:#a8c0f0; font-weight:600; }
+.ds-log-btn{ padding:2px 8px; font-size:10px; border:1px solid rgba(120,160,255,.3); border-radius:4px; background:rgba(60,80,120,.4); color:#a8c0f0; cursor:pointer; margin-left:4px; }
+.ds-log-btn:hover{ background:rgba(80,100,150,.5); }
+.ds-log-content{ max-height:60px; overflow-y:auto; padding:4px 8px; font-size:10px; color:var(--dim); line-height:1.4; }
+.ds-log-content::-webkit-scrollbar{ width:4px; }
+.ds-log-content::-webkit-scrollbar-thumb{ background:rgba(120,160,255,.3); border-radius:2px; }
 /* 冲突骰子弹窗 */
 #ds-dice-overlay{ position:fixed; inset:0; z-index:600; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; }
 #ds-dice-overlay.hidden{ display:none; }
@@ -1467,6 +1481,7 @@ body.dragging{ user-select:none; }
       </div>
       <div class="ds-mine" id="ds-mine-drop">
         <div class="ds-mine-title">我的卡组</div>
+        <div class="ds-mine-scroll" id="ds-mine-scroll">
         <div class="ds-mine-section">
           <div class="ds-ms-label">怪兽 <span id="ds-monster-cnt">0</span>种 = <span id="ds-monster-total">0</span>张</div>
           <div class="ds-mine-cards" id="ds-mine-monsters"></div>
@@ -1484,6 +1499,15 @@ body.dragging{ user-select:none; }
           <div class="ds-mine-cards" id="ds-mine-skill"></div>
         </div>
         <div class="ds-summary" id="ds-summary">卡组总计：0张（上限40）</div>
+        </div>
+        <div class="ds-log-box">
+          <div class="ds-log-header">
+            <span>问题日志</span>
+            <button id="ds-log-export" class="ds-log-btn">导出</button>
+            <button id="ds-log-clear" class="ds-log-btn">清空</button>
+          </div>
+          <div class="ds-log-content" id="ds-log-content"></div>
+        </div>
         <div class="ds-btns">
           <button id="ds-confirm" class="ds-btn">确认选卡</button>
           <button id="ds-cancel" class="ds-btn alt">返回菜单</button>
@@ -1754,7 +1778,79 @@ const ART = {
   dalong:'https://aka.doubaocdn.com/s/GedtSVc79Y',
   ddz:'https://aka.doubaocdn.com/s/7us8wAER8G',
   saguros_mon:'https://aka.doubaocdn.com/s/YngOc6IAAv',
-  holo_saguros_mon:'https://aka.doubaocdn.com/s/ezxKH8ShIP'
+  holo_saguros_mon:'https://aka.doubaocdn.com/s/ezxKH8ShIP',
+  /* 30张新增怪兽卡专属卡通卡面 */
+  m01:'https://aka.doubaocdn.com/s/DPz4nOZ9Xk', m02:'https://aka.doubaocdn.com/s/h1heBfakAW',
+  m03:'https://aka.doubaocdn.com/s/91vrgRZNPk', m04:'https://aka.doubaocdn.com/s/dXLfZlpo3x',
+  m05:'https://aka.doubaocdn.com/s/jELaUmLtEs', m06:'https://aka.doubaocdn.com/s/mshiLQUynU',
+  m07:'https://aka.doubaocdn.com/s/DLAFe7UNWX', m08:'https://aka.doubaocdn.com/s/hriWvFO78R',
+  m09:'https://aka.doubaocdn.com/s/8Y3xWxfzil', m10:'https://aka.doubaocdn.com/s/AAUWeBfgMd',
+  m11:'https://aka.doubaocdn.com/s/8wHgjZD3oX', m12:'https://aka.doubaocdn.com/s/i9xCYM85JU',
+  m13:'https://aka.doubaocdn.com/s/We5Gw8N9KD', m14:'https://aka.doubaocdn.com/s/22cTunzDH7',
+  m15:'https://aka.doubaocdn.com/s/Q95CovKbXq', m16:'https://aka.doubaocdn.com/s/4wy6piXKYb',
+  m17:'https://aka.doubaocdn.com/s/2kjT81izTX', m18:'https://aka.doubaocdn.com/s/tV4Htyq8Nb',
+  m19:'https://aka.doubaocdn.com/s/Nk2TwOWb03', m20:'https://aka.doubaocdn.com/s/A5gXeV5v5N',
+  m21:'https://aka.doubaocdn.com/s/rzEg7EuqIU', m22:'https://aka.doubaocdn.com/s/bUTUjnyHsy',
+  m23:'https://aka.doubaocdn.com/s/I0K5VALMSj', m24:'https://aka.doubaocdn.com/s/U5qUalMRvc',
+  m25:'https://aka.doubaocdn.com/s/CPHpdkUck9', m26:'https://aka.doubaocdn.com/s/jq5H2CJeNd',
+  m27:'https://aka.doubaocdn.com/s/hGtclGkQjZ', m28:'https://aka.doubaocdn.com/s/shWExuU0Qb',
+  m29:'https://aka.doubaocdn.com/s/ClHZgE7O3i', m30:'https://aka.doubaocdn.com/s/GnvPulHyYB',
+  /* 增益/减益/陷阱/技能通用卡面（按类型区分） */
+  buff_generic:'https://aka.doubaocdn.com/s/JaU8WgplzE',
+  debuff_generic:'https://aka.doubaocdn.com/s/jzhCJgbrd8',
+  trap_generic:'https://aka.doubaocdn.com/s/mOZ5V3G2wo',
+  skill_generic:'https://aka.doubaocdn.com/s/60Hs5JikhR',
+  /* 12张增益卡专属卡面 */
+  life_frenzy:'https://aka.doubaocdn.com/s/Z71yY3ifUr', indomitable:'https://aka.doubaocdn.com/s/PF1m5xX6QQ',
+  b01:'https://aka.doubaocdn.com/s/Mq76rvZOHV', b02:'https://aka.doubaocdn.com/s/mSzqOc9xte',
+  b03:'https://aka.doubaocdn.com/s/CZMfsNEfsT', b04:'https://aka.doubaocdn.com/s/CmZK8HO9X5',
+  b05:'https://aka.doubaocdn.com/s/D5eLyv1Fy8', b06:'https://aka.doubaocdn.com/s/81jBXyMCUV',
+  b07:'https://aka.doubaocdn.com/s/oKMsakS212', b08:'https://aka.doubaocdn.com/s/kV4WK7rZyU',
+  b09:'https://aka.doubaocdn.com/s/7jQZLVp7kM', b10:'https://aka.doubaocdn.com/s/WJcW4GLW6V',
+  /* 12张减益卡专属卡面 */
+  aging_curse:'https://aka.doubaocdn.com/s/4qor2MIJJF', death_threat:'https://aka.doubaocdn.com/s/99CMMGt9sa',
+  d01:'https://aka.doubaocdn.com/s/FqNyCtO2jE', d02:'https://aka.doubaocdn.com/s/0XzMdRnT3P',
+  d03:'https://aka.doubaocdn.com/s/UDBfzUZY7P', d04:'https://aka.doubaocdn.com/s/3CIcZFD0jG',
+  d05:'https://aka.doubaocdn.com/s/aVhEcJWL50', d06:'https://aka.doubaocdn.com/s/OcQd2ygqD9',
+  d07:'https://aka.doubaocdn.com/s/B2W1QU6Csq', d08:'https://aka.doubaocdn.com/s/FaDpZUZ3cr',
+  d09:'https://aka.doubaocdn.com/s/OjRQVUH7MU', d10:'https://aka.doubaocdn.com/s/EZa6ne5nRm',
+  /* 12张陷阱卡专属卡面 */
+  flash_damage:'https://aka.doubaocdn.com/s/OuwBXAdJmU', good_morning:'https://aka.doubaocdn.com/s/5XmYGgGuzH',
+  t01:'https://aka.doubaocdn.com/s/LXolzKVPdr', t02:'https://aka.doubaocdn.com/s/m3mSCo95qf',
+  t03:'https://aka.doubaocdn.com/s/Q3sQ9RzqV8', t04:'https://aka.doubaocdn.com/s/Y9Cuqwn5Da',
+  t05:'https://aka.doubaocdn.com/s/2SnaCLWcL3', t06:'https://aka.doubaocdn.com/s/Vvs181aSrV',
+  t07:'https://aka.doubaocdn.com/s/f9qFJGorBW', t08:'https://aka.doubaocdn.com/s/TvaNecI3pw',
+  t09:'https://aka.doubaocdn.com/s/hnMctjhJeV', t10:'https://aka.doubaocdn.com/s/KLcF90nH3x',
+  /* 15张技能卡专属卡面 */
+  sk01:'https://aka.doubaocdn.com/s/PBWmXROxOV', sk02:'https://aka.doubaocdn.com/s/NRUGT3zUFT',
+  sk03:'https://aka.doubaocdn.com/s/AfNfJVYBwZ', sk04:'https://aka.doubaocdn.com/s/rVobvNMjVY',
+  sk05:'https://aka.doubaocdn.com/s/Lfx5vLCuf1', sk06:'https://aka.doubaocdn.com/s/Xvnr5gJiAa',
+  sk07:'https://aka.doubaocdn.com/s/uMvNrArUaV', sk08:'https://aka.doubaocdn.com/s/ZEXMGiSRnB',
+  sk09:'https://aka.doubaocdn.com/s/INlyF2aeUQ', sk10:'https://aka.doubaocdn.com/s/ngkpuISZ04',
+  sk11:'https://aka.doubaocdn.com/s/LXdp2xU0u2', sk12:'https://aka.doubaocdn.com/s/4HPVBIhrrc',
+  sk13:'https://aka.doubaocdn.com/s/U9bH8K0V4h', sk14:'https://aka.doubaocdn.com/s/6buzZ7GYjB',
+  sk15:'https://aka.doubaocdn.com/s/mDFIM10Nyy',
+  /* 化龙怪兽专属卡面（由原怪兽模样蜕变带龙特征） */
+  dragon_rat_swarm:'https://aka.doubaocdn.com/s/9IZ8419QUW', dragon_shark:'https://aka.doubaocdn.com/s/JPzvxlLmGb',
+  dragon_mantis:'https://aka.doubaocdn.com/s/pCSjlnTHsz', dragon_dancer:'https://aka.doubaocdn.com/s/nYIeY4jZbP',
+  dragon_trimind:'https://aka.doubaocdn.com/s/dOmQoJPXM2', dragon_mad_dog:'https://aka.doubaocdn.com/s/0XkaKAGJPG',
+  dragon_armor:'https://aka.doubaocdn.com/s/zyPvP1ggcJ', dragon_frost:'https://aka.doubaocdn.com/s/XNRtnSzIk0',
+  dragon_passenger:'https://aka.doubaocdn.com/s/Tv2UKbpULF', dragon_book:'https://aka.doubaocdn.com/s/i4ktxCoxAT',
+  dragon_m01:'https://aka.doubaocdn.com/s/35NmUqTKqy', dragon_m02:'https://aka.doubaocdn.com/s/izJlVZAXUm',
+  dragon_m03:'https://aka.doubaocdn.com/s/ljSAsl85YM', dragon_m04:'https://aka.doubaocdn.com/s/WUT7brDBly',
+  dragon_m05:'https://aka.doubaocdn.com/s/8TbuTPYgmO', dragon_m06:'https://aka.doubaocdn.com/s/2d7UEhwso0',
+  dragon_m07:'https://aka.doubaocdn.com/s/UYSuZINofG', dragon_m08:'https://aka.doubaocdn.com/s/UpeZjHPzVM',
+  dragon_m09:'https://aka.doubaocdn.com/s/JGLpWSQZdj', dragon_m10:'https://aka.doubaocdn.com/s/CYqNv2Ve6N',
+  dragon_m11:'https://aka.doubaocdn.com/s/sc8Uq5Zey6', dragon_m12:'https://aka.doubaocdn.com/s/cdXoKB7cRO',
+  dragon_m13:'https://aka.doubaocdn.com/s/R2lp2vleYd', dragon_m14:'https://aka.doubaocdn.com/s/y6SXDdIia7',
+  dragon_m15:'https://aka.doubaocdn.com/s/9dDO9cYaxZ', dragon_m16:'https://aka.doubaocdn.com/s/SCXjSRqM6k',
+  dragon_m17:'https://aka.doubaocdn.com/s/z4f17Zqx78', dragon_m18:'https://aka.doubaocdn.com/s/BIsHVCZk5J',
+  dragon_m19:'https://aka.doubaocdn.com/s/nXmoCJlxw5', dragon_m20:'https://aka.doubaocdn.com/s/DbV1jKut58',
+  dragon_m21:'https://aka.doubaocdn.com/s/VAxeYkVLVs', dragon_m22:'https://aka.doubaocdn.com/s/62F8AlOVjV',
+  dragon_m23:'https://aka.doubaocdn.com/s/utUJbAFYKM', dragon_m24:'https://aka.doubaocdn.com/s/m8dNVZHeS1',
+  dragon_m25:'https://aka.doubaocdn.com/s/uZ2OjPdaKW', dragon_m26:'https://aka.doubaocdn.com/s/BAAeTWEMIP',
+  dragon_m27:'https://aka.doubaocdn.com/s/Tk2tgeppyz', dragon_m28:'https://aka.doubaocdn.com/s/zM0ByqFVgP',
+  dragon_m29:'https://aka.doubaocdn.com/s/o58awUOORR', dragon_m30:'https://aka.doubaocdn.com/s/xCegxfpPzo'
 };
 
 /* 10 种基础怪兽（每种 3 张），hp 为固定生命值，race 为种族（用于种族针对陷阱） */
@@ -1953,7 +2049,17 @@ function cardById(id){ return CARD_BY_ID[id] || null; }
 function artOf(c){
   if(!c) return ART.cardback;
   const key = (c.artKey || c.art || c.id);
-  return ART[key] || ART.cardback;
+  if(ART[key]) return ART[key];
+  // 技能卡（虚影技能池）回退到通用技能卡面
+  if(c.skill || c.cd != null || (c.kind && ['attack','shield','heal','buff','debuff'].includes(c.kind) && c.type==='skill')) return ART.skill_generic;
+  // 新增卡牌未配置专门卡面时，按类型回退到通用卡面
+  const type = c.type || (c.kind==='buff'?'spell':(c.kind==='debuff'?'spell':(c.targetRace||c.kind==='combo_trap'?'trap':'monster')));
+  if(type==='monster' || c.atk!=null) return ART.rat_swarm; // 通用怪兽卡面
+  if(type==='spell' && c.kind==='buff') return ART.buff_generic;
+  if(type==='spell' && c.kind==='debuff') return ART.debuff_generic;
+  if(type==='trap') return ART.trap_generic;
+  if(type==='event') return ART.roar_dragon;
+  return ART.cardback;
 }
 /* 把场上怪兽复制到手牌：融合怪兽复制为融合版（保留倍率、增益、素材） */
 function copyToHand(owner, src){
@@ -2906,6 +3012,8 @@ function trySummon(handIdx, pos, owner){
   pl.summoned = true;
   log(`${owner===P?'你':'对手'}召唤了「${c.name}」（${pos==='atk'?'攻击表示':'守备表示'}）`,'spell');
   netLog(`${owner===P?'你':'对手'}召唤了「${c.name}」（${pos==='atk'?'攻击表示':'守备表示'}）`,'spell');
+  // 召唤立体投影
+  fxHolo(owner, slot, pl.mz[slot], 'ok');
   G.selHand = null;
   if(netIsHost()) netBroadcast();
   renderAll();
@@ -3901,7 +4009,8 @@ async function useEvent(handIdx, owner){
         m.buffA = na - (m.baseAtk + (m.fusedBonus||0));
         m.buffD = nd - (m.baseDef + (m.fusedBonus||0));
         m.atk = na; m.def = nd;
-        m.artKey = 'dragon_art'; m.holoKey = 'dragon_holo';
+        m.artKey = ART['dragon_'+m.id] ? ('dragon_'+m.id) : 'dragon_art';
+        m.holoKey = ART['dragon_'+m.id] ? ('dragon_'+m.id) : 'dragon_holo';
         m.dragon = true;
         await dragonFx(m, oldName);
         log(`「${oldName}」化龙！成为「${newName}」，攻击力与守备力翻倍！（攻 ${m.atk} 守 ${m.def}）`,'effect');
@@ -4368,9 +4477,31 @@ const DRAGON_NAMES = {
   rat_swarm:'鼠群', shark:'强鲨', mantis:'飞螳', dancer:'旋舞', trimind:'三佛',
   mad_dog:'狂狗', armor:'荒骑', frost:'冰恐', passenger:'乘船', book:'鸿尚',
   ultimate_roar:'穹', purple_witch:'紫妖', saguros_mon:'萨格', hyakki_mon:'百怪',
-  arrogant_dragon:'天傲'
+  arrogant_dragon:'天傲',
+  /* 30种新增怪兽 */
+  m01:'岩甲', m02:'幽隼', m03:'巨螯', m04:'虚蜥', m05:'枯木',
+  m06:'陨犀', m07:'冥母', m08:'骨狼', m09:'瘴蛞', m10:'碎晶',
+  m11:'幻狐', m12:'熔龟', m13:'丧鸦', m14:'沙虫', m15:'幽马',
+  m16:'苔蚺', m17:'暗剑', m18:'锈铜', m19:'血蝠', m20:'灰虫',
+  m21:'星陨', m22:'死花', m23:'黑犸', m24:'盲虾', m25:'魂蝣',
+  m26:'古蛛', m27:'冰蟾', m28:'蚀骨', m29:'幽章', m30:'亡熊'
 };
-function dragonName(id){ return DRAGON_NAMES[id] || '化'; }
+function dragonName(id){
+  if(!id) return '化';
+  if(DRAGON_NAMES[id]) return DRAGON_NAMES[id];
+  // 融合卡：从素材中提取第一个基础怪兽 id（格式如 fused_rat_swarm_xxx）
+  if(id.startsWith('fused_')){
+    const parts = id.replace('fused_','').split('_');
+    // 尝试匹配可能的基础 id（m01-m30 或基础怪兽 id）
+    for(let i=0;i<parts.length;i++){
+      const candidate = parts.slice(0,i+1).join('_');
+      if(DRAGON_NAMES[candidate]) return DRAGON_NAMES[candidate];
+    }
+    // 单独检查每个部分
+    for(const p of parts){ if(DRAGON_NAMES[p]) return DRAGON_NAMES[p]; }
+  }
+  return '化';
+}
 
 /* ============================================================
    四首百怪：检测场/墓/手/牌堆中 4 张相同怪兽（融合卡算 3 张相同卡）
@@ -5364,7 +5495,10 @@ async function aiTurn(){
         me.mz[slot] = makeMonster(pick.h, pos);
       }
       me.summoned = true;
+      const summonedMon = me.mz[slot];
       log(`对手召唤了「${typeof pick.h==='object'?pick.h.name:cardById(pick.h).name}」（${pos==='def'?'守备表示':'攻击表示'}）`,'msg');
+      // 召唤立体投影（确保用正确的卡面而非卡背）
+      fxHolo(AI, slot, summonedMon, 'ok');
       renderAll(); await sleep(700);
     }
   }
@@ -5652,9 +5786,12 @@ document.addEventListener('pointerdown', e=>{
     onZoneDown(e, +zone.dataset.p, zone.dataset.zone, +zone.dataset.slot);
   }
 });
-document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => {
+  // 选卡界面的 .ds-card 允许拖拽，其余全局阻止默认拖拽
+  if(!e.target.closest('#deck-select-overlay .ds-card')) e.preventDefault();
+});
 document.addEventListener('click', async function(e){
-  if(G.winner!==null) return;
+  if(!G || G.winner!==null) return;
   // 手牌点击
   const hc = e.target.closest('.hand-card');
   if(hc && G.active===P && !G.busy){
@@ -6676,7 +6813,7 @@ function renderDSPools(){
   for(const s of SKILL_POOL){
     const taken = DS.mine.skill===s.id;
     html += `<div class="ds-card${taken?' selected':''}" draggable="true" data-id="${s.id}" data-pool="skill" title="${s.name}（${s.kind}）冷却${s.cd}回合：${s.desc}">
-      <img src="${ART.cardback}" alt="${s.name}"><div class="ds-card-stats"><span>CD${s.cd}</span><span>${s.kind==='attack'?'攻击':s.kind==='shield'?'护盾':s.kind==='heal'?'回复':s.kind==='buff'?'增益':'减益'}</span></div>
+      <img src="${ART.ghost}" alt="${s.name}"><div class="ds-card-stats"><span>CD${s.cd}</span><span>${s.kind==='attack'?'攻击':s.kind==='shield'?'护盾':s.kind==='heal'?'回复':s.kind==='buff'?'增益':'减益'}</span></div>
       <div class="ds-card-name">${s.name}</div></div>`;
   }
   $('#ds-skill-pool').innerHTML = html;
@@ -6753,27 +6890,171 @@ function dsRemove(id, pool){
   else if(pool==='skill') m.skill = null;
   renderDSPools(); renderDSMine();
 }
+/* 冲突骰子失败后自动替换：从可用卡池中随机选一张同类型的卡（避免死循环） */
+function dsAutoReplace(pool, conflictId){
+  const m = DS.mine;
+  const ai = DS.ai || {monsters:[],events:[],buffs:[],debuffs:[],traps:[],skill:null};
+  let pool_arr = [], selected_arr = [], ai_arr = [];
+  if(pool==='monster'){ pool_arr = ALL_MONSTERS; selected_arr = m.monsters; ai_arr = ai.monsters; }
+  else if(pool==='event'){ pool_arr = EVENT_DEFS.filter(e=>e.id!=='hell'&&e.id!=='arrogant'); selected_arr = m.events; ai_arr = ai.events; }
+  else if(pool==='buff'){ pool_arr = ALL_BUFFS; selected_arr = m.buffs; ai_arr = ai.buffs; }
+  else if(pool==='debuff'){ pool_arr = ALL_DEBUFFS; selected_arr = m.debuffs; ai_arr = ai.debuffs; }
+  else if(pool==='trap'){ pool_arr = ALL_TRAPS; selected_arr = m.traps; ai_arr = ai.traps; }
+  else if(pool==='skill'){ pool_arr = SKILL_POOL; selected_arr = m.skill?[m.skill]:[]; ai_arr = ai.skill?[ai.skill]:[]; }
+  // 可用卡：不在玩家已选、不在AI已选、不是冲突卡
+  const avail = pool_arr.filter(c=>!selected_arr.includes(c.id) && !ai_arr.includes(c.id) && c.id!==conflictId);
+  if(!avail.length) return null;
+  const pick = avail[Math.floor(Math.random()*avail.length)];
+  if(pool==='skill'){ m.skill = pick.id; }
+  else if(pool==='monster'){ m.monsters.push(pick.id); }
+  else if(pool==='event'){ m.events.push(pick.id); }
+  else if(pool==='buff'){ m.buffs.push(pick.id); }
+  else if(pool==='debuff'){ m.debuffs.push(pick.id); }
+  else if(pool==='trap'){ m.traps.push(pick.id); }
+  renderDSPools(); renderDSMine();
+  return pick;
+}
+/* 冲突骰子失败后：弹出窗口让玩家手动选择替换卡牌（避免自动替换的随机性） */
+function showReplaceModal(pool, conflictId, conflictName){
+  return new Promise(resolve=>{
+    const m = DS.mine;
+    const ai = DS.ai || {monsters:[],events:[],buffs:[],debuffs:[],traps:[],skill:null};
+    let pool_arr = [], selected_arr = [], ai_arr = [];
+    if(pool==='monster'){ pool_arr = ALL_MONSTERS; selected_arr = m.monsters; ai_arr = ai.monsters; }
+    else if(pool==='event'){ pool_arr = EVENT_DEFS.filter(e=>e.id!=='hell'&&e.id!=='arrogant'); selected_arr = m.events; ai_arr = ai.events; }
+    else if(pool==='buff'){ pool_arr = ALL_BUFFS; selected_arr = m.buffs; ai_arr = ai.buffs; }
+    else if(pool==='debuff'){ pool_arr = ALL_DEBUFFS; selected_arr = m.debuffs; ai_arr = ai.debuffs; }
+    else if(pool==='trap'){ pool_arr = ALL_TRAPS; selected_arr = m.traps; ai_arr = ai.traps; }
+    else if(pool==='skill'){ pool_arr = SKILL_POOL; selected_arr = m.skill?[m.skill]:[]; ai_arr = ai.skill?[ai.skill]:[]; }
+    // 可用卡：不在玩家已选、不在AI已选、不是冲突卡
+    const avail = pool_arr.filter(c=>!selected_arr.includes(c.id) && !ai_arr.includes(c.id) && c.id!==conflictId);
+    const poolName = {monster:'怪兽',event:'事件',buff:'增益',debuff:'减益',trap:'陷阱',skill:'技能'}[pool]||pool;
+    
+    if(avail.length===0){
+      // 没有可用卡，返回null
+      const root = $('#modal-root');
+      root.innerHTML = `
+        <div class="modal-mask"></div>
+        <div class="modal" style="width:360px;text-align:center">
+          <h3>无法替换</h3>
+          <div class="modal-body">
+            <p style="font-size:13px;color:var(--dim);margin-bottom:16px">没有可用的${poolName}卡来替换「${conflictName}」，将返回选卡界面重新选择。</p>
+            <button class="primary" id="rp-ok" style="padding:10px 30px;border-radius:10px;font-size:14px">确定</button>
+          </div>
+        </div>`;
+      root.querySelector('#rp-ok').addEventListener('click', ()=>{ root.innerHTML=''; resolve(null); });
+      return;
+    }
+    
+    // 渲染可用卡牌供选择
+    const root = $('#modal-root');
+    let cardsHtml = '';
+    for(const c of avail){
+      const isMonster = c.type==='monster' || pool==='monster';
+      const stats = isMonster ? `<div class="ds-card-stats"><span>攻${c.atk}</span><span>守${c.def}</span></div>` : '';
+      const race = (c.race && isMonster) ? `<span style="position:absolute;top:1px;left:50%;transform:translateX(-50%);font-size:7px;color:#ffd700;text-shadow:0 0 2px #000;">${c.race}</span>` : '';
+      cardsHtml += `<div class="ds-card replace-card" data-id="${c.id}" data-name="${c.name}" title="${c.name}：${c.desc||''}">
+        <img src="${artOf(c)}" alt="${c.name}" onerror="this.src='${ART.cardback}'">
+        ${race}${stats}
+        <div class="ds-card-name">${c.name}</div>
+      </div>`;
+    }
+    
+    root.innerHTML = `
+      <div class="modal-mask"></div>
+      <div class="modal" style="width:680px;max-height:85vh;display:flex;flex-direction:column">
+        <h3 style="margin-bottom:8px">选择替换卡牌</h3>
+        <p style="font-size:12px;color:var(--dim);margin-bottom:12px;text-align:center">
+          冲突骰子失败，「${conflictName}」归对手所有。请从以下${avail.length}张${poolName}卡中选择一张替换：
+        </p>
+        <div id="rp-cards" style="flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;padding:10px;border:1px solid var(--border);border-radius:10px;min-height:200px">
+          ${cardsHtml}
+        </div>
+        <div style="text-align:right;margin-top:12px">
+          <button class="alt" id="rp-cancel" style="padding:8px 20px;border-radius:8px;font-size:13px;margin-right:8px">返回选卡界面</button>
+        </div>
+      </div>`;
+    
+    // 绑定卡牌点击
+    root.querySelectorAll('.replace-card').forEach(card=>{
+      card.addEventListener('click', ()=>{
+        const id = card.dataset.id;
+        const name = card.dataset.name;
+        root.innerHTML = '';
+        resolve({id, name});
+      });
+    });
+    // 取消按钮：返回选卡界面
+    root.querySelector('#rp-cancel').addEventListener('click', ()=>{
+      root.innerHTML = '';
+      resolve({cancel:true});
+    });
+  });
+}
+/* 选卡界面问题日志：记录所有操作和错误，方便导出排查 */
+let DS_LOG = [];
+function dsLog(action, detail){
+  DS_LOG.push({ t:Date.now(), turn:DS?DS.mode:'init', action, detail: detail||'' });
+  if(DS_LOG.length > 500) DS_LOG.shift();
+  // 实时更新日志显示
+  const el = $('#ds-log-content');
+  if(el){
+    const entry = DS_LOG[DS_LOG.length-1];
+    const time = new Date(entry.t).toLocaleTimeString();
+    el.innerHTML = `<div style="font-size:10px;color:var(--dim);margin-bottom:2px">[${time}] ${entry.action}: ${entry.detail}</div>` + el.innerHTML;
+  }
+}
+function exportDSLog(){
+  if(!DS_LOG.length){ toast('暂无日志'); return; }
+  const payload = { game:'凡骨对战', section:'战前选卡', exportedAt:new Date().toISOString(), selection:DS?{mine:DS.mine, ai:DS.ai, mode:DS.mode}:null, logs:DS_LOG };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = '凡骨对战-选卡日志-'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('日志已导出');
+}
 function bindDSDrag(){
-  document.querySelectorAll('#deck-select-overlay .ds-card[draggable]').forEach(el=>{
-    el.ondragstart = (e)=>{ e.dataTransfer.setData('text/plain', JSON.stringify({id:el.dataset.id, pool:el.dataset.pool})); el.classList.add('dragging'); };
+  document.querySelectorAll('#deck-select-overlay .ds-card').forEach(el=>{
+    el.draggable = true; // 强制启用拖拽
+    // 用 pointerdown/pointerup 判断真实点击（拖拽会拦截 click 事件）
+    let downX = 0, downY = 0, downTime = 0;
+    el.addEventListener('pointerdown', e=>{ downX=e.clientX; downY=e.clientY; downTime=Date.now(); });
+    el.addEventListener('pointerup', e=>{
+      const dx = Math.abs(e.clientX - downX), dy = Math.abs(e.clientY - downY);
+      const dt = Date.now() - downTime;
+      if(dx < 6 && dy < 6 && dt < 500){
+        // 真实点击：查看详情
+        dsLog('点击查看详情', el.dataset.id + ' (' + el.dataset.pool + ')');
+        showDSCardDetail(el.dataset.id, el.dataset.pool);
+      }
+    });
+    el.ondragstart = (e)=>{
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setData('text/plain', JSON.stringify({id:el.dataset.id, pool:el.dataset.pool}));
+      el.classList.add('dragging');
+      dsLog('开始拖拽', el.dataset.id + ' (' + el.dataset.pool + ')');
+    };
     el.ondragend = ()=>{ el.classList.remove('dragging'); };
-    el.onclick = ()=>{ showDSCardDetail(el.dataset.id, el.dataset.pool); };
   });
   const drop = $('#ds-mine-drop');
-  drop.ondragover = (e)=>{ e.preventDefault(); drop.classList.add('drag-over'); };
+  drop.ondragover = (e)=>{ e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; drop.classList.add('drag-over'); };
   drop.ondragleave = ()=>{ drop.classList.remove('drag-over'); };
   drop.ondrop = (e)=>{
     e.preventDefault(); drop.classList.remove('drag-over');
-    try{ const d=JSON.parse(e.dataTransfer.getData('text/plain')); dsAdd(d.id, d.pool); }catch(err){}
+    try{ const d=JSON.parse(e.dataTransfer.getData('text/plain')); dsAdd(d.id, d.pool); dsLog('拖拽添加', d.id+' ('+d.pool+')'); }catch(err){ dsLog('拖拽失败', err.message); }
   };
 }
 function showDSCardDetail(id, pool){
+  try{
+  dsLog('详情函数调用', id + ' (' + pool + ')');
   let c = cardById(id);
-  if(pool==='skill'){ c = SKILL_POOL.find(x=>x.id===id); if(!c) return;
+  if(pool==='skill'){ c = SKILL_POOL.find(x=>x.id===id); if(!c){ dsLog('详情失败', '技能未找到:'+id); toast('技能数据未找到'); return; }
     showModal({ title:c.name, body:`<p><b>类型：</b>虚影技能 · ${c.kind==='attack'?'攻击':c.kind==='shield'?'护盾':c.kind==='heal'?'回复':c.kind==='buff'?'增益':'减益'}</p><p><b>冷却：</b>${c.cd}回合</p><p><b>效果：</b>${c.desc}</p><p style="color:var(--dim);font-size:11px">一次性效果，无持续时间。使用后进入冷却，冷却结束可再次使用。</p>`, buttons:[{label:'选择此技能',value:'select'},{label:'关闭',cls:'primary',value:1}] }).then(r=>{ if(r==='select') dsAdd(id,'skill'); });
     return;
   }
-  if(!c) return;
+  if(!c){ dsLog('详情失败', '卡牌未找到:'+id); toast('卡牌数据未找到'); return; }
   const isMonster = c.type==='monster';
   let body = `<div style="display:flex;gap:12px;align-items:flex-start"><div style="width:100px;flex:0 0 100px;border-radius:8px;overflow:hidden;border:2px solid var(--line-2)"><img src="${artOf(c)}" style="width:100%"></div><div style="flex:1;font-size:12.5px;line-height:1.8">`;
   if(isMonster){ body += `<p><b>种族：</b>${c.race||'未知'}</p><p><b>攻击力：</b>${c.atk}</p><p><b>守备力：</b>${c.def}</p><p><b>生命值：</b>${c.hp}</p><p><b>总和：</b>${(c.atk||0)+(c.def||0)+(c.hp||0)}</p>`; }
@@ -6781,6 +7062,7 @@ function showDSCardDetail(id, pool){
   body += `<p><b>效果：</b>${c.desc||'无'}</p></div></div>`;
   const canSelect = pool!=='monster' || !DS.mine.monsters.includes(id);
   showModal({ title:c.name, body, buttons:[...(canSelect?[{label:'选择此卡',value:'select'}]:[]),{label:'关闭',cls:'primary',value:1}] }).then(r=>{ if(r==='select') dsAdd(id,pool); });
+  }catch(e){ dsLog('详情异常', e.message); console.error('showDSCardDetail error:', e); toast('详情显示异常:'+e.message); }
 }
 function validateDS(){
   const m = DS.mine;
@@ -6828,11 +7110,25 @@ function findConflicts(){
 }
 /* 冲突骰子：逐个解决冲突 */
 let DS_CONFLICT_IDX = 0;
+let DS_CONFLICT_FAILED = false; // 标记是否有替换失败
 function resolveNextConflict(){
   const conflicts = DS.conflicts;
   if(DS_CONFLICT_IDX >= conflicts.length){
-    // 所有冲突解决，开始游戏
+    // 所有冲突解决，最终验证卡组完整性
     $('#ds-dice-overlay').classList.add('hidden');
+    const err = validateDS();
+    if(err || DS_CONFLICT_FAILED){
+      // 验证失败或有替换失败，返回选卡界面让用户重新选
+      dsLog('冲突解决后验证失败', err || '自动替换失败，卡组不完整');
+      toast('卡组不完整：' + (err || '自动替换失败') + '，请重新选卡');
+      DS_CONFLICT_FAILED = false;
+      DS_CONFLICT_IDX = 0;
+      renderDSPools(); renderDSMine();
+      return;
+    }
+    // 验证通过，记录最终卡组并开始游戏
+    const total = DS.mine.monsters.length*3 + DS.mine.buffs.length + DS.mine.debuffs.length + DS.mine.traps.length + DS.mine.events.length;
+    dsLog('冲突全部解决，卡组确认', `怪兽${DS.mine.monsters.length}种(${DS.mine.monsters.length*3}张)/增益${DS.mine.buffs.length}/减益${DS.mine.debuffs.length}/陷阱${DS.mine.traps.length}/事件${DS.mine.events.length}/技能1，共${total}张`);
     DECK_SELECT = { P:DS.mine, AI:DS.ai };
     $('#deck-select-overlay').classList.add('hidden');
     if(DS.mode==='solo'){ startSoloAfterSelect(); }
@@ -6841,7 +7137,7 @@ function resolveNextConflict(){
   }
   const c = conflicts[DS_CONFLICT_IDX];
   $('#ds-dice-title').textContent = '卡牌冲突：' + c.name;
-  $('#ds-dice-desc').textContent = `双方都选择了「${c.name}」，投骰子决定归属（点数大者获得，小者重新选卡）`;
+  $('#ds-dice-desc').textContent = `双方都选择了「${c.name}」，投骰子决定归属（点数大者获得，小者自动替换为同类型其他卡）`;
   $('#ds-dice-p').textContent = '?';
   $('#ds-dice-ai').textContent = '?';
   $('#ds-dice-result').textContent = '';
@@ -6859,20 +7155,53 @@ function dsRollDice(){
     $('#ds-dice-result').style.color = '#4ade80';
     // 从 AI 移除，AI 重新选一张同类型的
     dsAiReplace(c);
+    dsLog('冲突骰子胜利', '你获得: '+c.name+'，AI已自动替换');
+    $('#ds-dice-roll').style.display = 'none';
+    DS_CONFLICT_IDX++;
+    setTimeout(resolveNextConflict, 1800);
   }else if(ai > p){
-    $('#ds-dice-result').textContent = `对手获得「${c.name}」！你需要重新选卡`;
+    $('#ds-dice-result').textContent = `对手获得「${c.name}」！请选择一张同类型卡牌替换`;
     $('#ds-dice-result').style.color = '#ef4444';
     // 从玩家移除
     dsRemove(c.id, c.pool);
+    dsLog('冲突骰子失败', 'AI获得: '+c.name);
+    $('#ds-dice-roll').style.display = 'none';
+    // 弹出窗口让玩家手动选择替换卡牌
+    showReplaceModal(c.pool, c.id, c.name).then(replacement=>{
+      if(replacement && replacement.cancel){
+        // 用户选择返回选卡界面
+        DS_CONFLICT_FAILED = true;
+        dsLog('玩家选择返回选卡界面', '冲突: '+c.name);
+        DS_CONFLICT_IDX++;
+        setTimeout(resolveNextConflict, 500);
+      }else if(replacement && replacement.id){
+        // 用户选择了替换卡
+        if(c.pool==='skill'){ DS.mine.skill = replacement.id; }
+        else if(c.pool==='monster'){ DS.mine.monsters.push(replacement.id); }
+        else if(c.pool==='event'){ DS.mine.events.push(replacement.id); }
+        else if(c.pool==='buff'){ DS.mine.buffs.push(replacement.id); }
+        else if(c.pool==='debuff'){ DS.mine.debuffs.push(replacement.id); }
+        else if(c.pool==='trap'){ DS.mine.traps.push(replacement.id); }
+        renderDSPools(); renderDSMine();
+        dsLog('玩家手动替换成功', c.name + ' → ' + replacement.name + ' (id:' + replacement.id + ')');
+        $('#ds-dice-result').textContent = `对手获得「${c.name}」！你选择了「${replacement.name}」作为替换`;
+        $('#ds-dice-result').style.color = '#4ade80';
+        DS_CONFLICT_IDX++;
+        setTimeout(resolveNextConflict, 1500);
+      }else{
+        // 没有可用卡，替换失败
+        DS_CONFLICT_FAILED = true;
+        dsLog('替换失败', '没有可用的'+c.pool+'类型卡牌替换 '+c.name);
+        DS_CONFLICT_IDX++;
+        setTimeout(resolveNextConflict, 1000);
+      }
+    });
   }else{
     $('#ds-dice-result').textContent = '平局！重新投骰子';
     $('#ds-dice-result').style.color = '#ffd700';
     setTimeout(()=>{ $('#ds-dice-p').textContent='?'; $('#ds-dice-ai').textContent='?'; $('#ds-dice-result').textContent=''; }, 1000);
     return; // 不推进
   }
-  $('#ds-dice-roll').style.display = 'none';
-  DS_CONFLICT_IDX++;
-  setTimeout(resolveNextConflict, 1800);
 }
 function dsAiReplace(c){
   const ai = DS.ai;
@@ -6885,8 +7214,13 @@ function dsAiReplace(c){
 function openDeckSelect(mode){
   DS = { mode, mine:{monsters:[],events:[],buffs:[],debuffs:[],traps:[],skill:null}, ai:null, conflicts:[], pendingConfirm:false };
   DS_CONFLICT_IDX = 0;
+  DS_CONFLICT_FAILED = false;
+  DS_LOG = [];
+  $('#ds-log-content').innerHTML = '';
+  dsLog('选卡界面打开', '模式:'+mode);
   $('#deck-select-overlay').classList.remove('hidden');
   renderDSPools(); renderDSMine();
+  dsLog('卡池渲染完成', '怪兽'+ALL_MONSTERS.length+'种/事件'+EVENT_DEFS.length+'张/增益'+ALL_BUFFS.length+'张/减益'+ALL_DEBUFFS.length+'张/陷阱'+ALL_TRAPS.length+'张/技能'+SKILL_POOL.length+'个');
 }
 function confirmDeckSelect(){
   const err = validateDS();
@@ -6970,6 +7304,8 @@ $('#menu-room').addEventListener('keydown', e=>{ if(e.key==='Enter') startJoin()
 $('#ds-confirm').addEventListener('click', confirmDeckSelect);
 $('#ds-cancel').addEventListener('click', ()=>{ $('#deck-select-overlay').classList.add('hidden'); showMenu(); });
 $('#ds-dice-roll').addEventListener('click', dsRollDice);
+$('#ds-log-export').addEventListener('click', exportDSLog);
+$('#ds-log-clear').addEventListener('click', ()=>{ DS_LOG=[]; $('#ds-log-content').innerHTML=''; dsLog('日志已清空',''); });
 
 /* 启动 */
 $('#record').innerHTML = recHtml();
