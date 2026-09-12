@@ -737,6 +737,7 @@ button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
   border:1px solid var(--line-2); background:#fff; color:var(--txt);
 }
 .modal .modal-btns button.primary{ background:linear-gradient(180deg,#7aa7ea,#3f76cf); color:#fff; border-color:#2f6fd0; }
+.modal .modal-btns button.danger{ background:linear-gradient(180deg,#ef6b6b,#c0392b); color:#fff; border-color:#a93226; }
 
 /* 先攻骰子：开局蒙纱模糊层 */
 #dice-overlay{
@@ -1369,6 +1370,57 @@ body.dragging{ user-select:none; }
 .menu-status{ margin-top:14px; min-height:20px; font-size:13px; font-weight:700; color:var(--accent-deep); }
 .menu-status.err{ color:#c0392b; }
 .menu-note{ margin-top:14px; font-size:12px; color:var(--dim); line-height:1.6; }
+/* ============================================================
+   战前选卡界面（v2.0）
+   ============================================================ */
+#deck-select-overlay{ position:fixed; inset:0; z-index:500; background:rgba(10,15,30,.92); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; }
+#deck-select-overlay.hidden{ display:none; }
+.ds-box{ width:96vw; max-width:1400px; height:92vh; background:linear-gradient(160deg,#1a2340,#0f1528); border:1px solid rgba(120,160,255,.3); border-radius:16px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+.ds-header{ padding:14px 20px 10px; border-bottom:1px solid rgba(120,160,255,.15); }
+.ds-header h2{ margin:0; font-size:20px; color:#e8f0ff; }
+.ds-sub{ margin:4px 0 0; font-size:11.5px; color:var(--dim); }
+.ds-layout{ flex:1; display:flex; gap:10px; padding:10px; overflow:hidden; }
+.ds-pools{ flex:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:8px; overflow:hidden; }
+.ds-pool{ background:rgba(20,30,55,.6); border:1px solid rgba(120,160,255,.12); border-radius:10px; display:flex; flex-direction:column; overflow:hidden; }
+.ds-pool-title{ padding:6px 10px; font-size:11.5px; font-weight:600; color:#a8c0f0; background:rgba(40,60,100,.3); border-bottom:1px solid rgba(120,160,255,.1); flex:0 0 auto; }
+.ds-pool-cards{ flex:1; overflow-y:auto; padding:6px; display:flex; flex-wrap:wrap; gap:5px; align-content:flex-start; }
+.ds-pool-cards::-webkit-scrollbar{ width:5px; }
+.ds-pool-cards::-webkit-scrollbar-thumb{ background:rgba(120,160,255,.3); border-radius:3px; }
+.ds-card{ width:62px; height:86px; border-radius:6px; overflow:hidden; border:1.5px solid rgba(120,160,255,.25); cursor:grab; position:relative; flex:0 0 auto; transition:transform .15s, box-shadow .15s; background:#1a2340; }
+.ds-card:hover{ transform:translateY(-3px) scale(1.06); box-shadow:0 4px 14px rgba(100,150,255,.4); z-index:5; }
+.ds-card img{ width:100%; height:100%; object-fit:cover; display:block; }
+.ds-card .ds-card-name{ position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(0,0,0,.85)); color:#fff; font-size:8px; padding:8px 2px 2px; text-align:center; line-height:1.1; }
+.ds-card .ds-card-stats{ position:absolute; top:1px; left:2px; right:2px; display:flex; justify-content:space-between; font-size:7.5px; color:#fff; text-shadow:0 0 3px #000; font-weight:700; }
+.ds-card.selected{ border-color:#ffd700; box-shadow:0 0 8px rgba(255,215,0,.5); opacity:.4; }
+.ds-card.dragging{ opacity:.5; }
+.ds-mine{ width:300px; flex:0 0 300px; background:rgba(15,22,42,.8); border:1px solid rgba(120,160,255,.2); border-radius:10px; display:flex; flex-direction:column; overflow:hidden; }
+.ds-mine.drag-over{ border-color:#4ade80; box-shadow:0 0 16px rgba(74,222,128,.4); }
+.ds-mine-title{ padding:8px 12px; font-size:13px; font-weight:700; color:#e8f0ff; background:rgba(40,60,100,.3); border-bottom:1px solid rgba(120,160,255,.15); }
+.ds-mine-section{ padding:6px 8px; border-bottom:1px solid rgba(120,160,255,.08); }
+.ds-ms-label{ font-size:10.5px; color:#a8c0f0; margin-bottom:4px; }
+.ds-mine-cards{ display:flex; flex-wrap:wrap; gap:4px; min-height:30px; }
+.ds-mine-card{ width:44px; height:62px; border-radius:4px; overflow:hidden; border:1px solid rgba(120,160,255,.3); position:relative; cursor:pointer; }
+.ds-mine-card img{ width:100%; height:100%; object-fit:cover; }
+.ds-mine-card .ds-remove{ position:absolute; top:-4px; right:-4px; width:16px; height:16px; background:#ef4444; color:#fff; border-radius:50%; font-size:11px; line-height:16px; text-align:center; cursor:pointer; display:none; }
+.ds-mine-card:hover .ds-remove{ display:block; }
+.ds-summary{ padding:8px 12px; font-size:11.5px; color:#a8c0f0; border-top:1px solid rgba(120,160,255,.15); text-align:center; }
+.ds-btns{ padding:8px 12px 12px; display:flex; gap:8px; }
+.ds-btn{ flex:1; padding:8px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; background:linear-gradient(135deg,#4a7fff,#3060e0); color:#fff; transition:transform .1s, box-shadow .1s; }
+.ds-btn:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(74,127,255,.4); }
+.ds-btn.alt{ background:rgba(60,80,120,.5); color:#a8c0f0; }
+.ds-btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+/* 冲突骰子弹窗 */
+#ds-dice-overlay{ position:fixed; inset:0; z-index:600; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; }
+#ds-dice-overlay.hidden{ display:none; }
+.ds-dice-box{ background:linear-gradient(160deg,#1a2340,#0f1528); border:1px solid rgba(255,215,0,.4); border-radius:14px; padding:24px 32px; text-align:center; min-width:320px; }
+.ds-dice-box h3{ margin:0 0 8px; color:#ffd700; }
+.ds-dice-box p{ color:#a8c0f0; font-size:13px; margin:6px 0; }
+.ds-dice-area{ display:flex; align-items:center; justify-content:center; gap:20px; margin:16px 0; }
+.ds-dice-side{ display:flex; flex-direction:column; gap:4px; }
+.ds-dice-side span{ font-size:11px; color:var(--dim); }
+.ds-dice-side b{ font-size:36px; color:#fff; }
+.ds-dice-vs{ font-size:18px; color:#ffd700; font-weight:700; }
+#ds-dice-result{ font-size:14px; font-weight:600; min-height:20px; }
 </style>
 </head>
 <body>
@@ -1385,6 +1437,73 @@ body.dragging{ user-select:none; }
     </div>
     <div class="menu-status" id="menu-status"></div>
     <div class="menu-note">联机对战：由开房玩家作为主机承载对局，加入方输入主机给出的 4 位房间号即可。主机掉线或退出则对局结束。</div>
+  </div>
+</div>
+<!-- 战前选卡界面（v2.0）：4个池子 + 己方区域 + 拖拽选卡 + 冲突骰子 -->
+<div id="deck-select-overlay" class="hidden">
+  <div class="ds-box">
+    <div class="ds-header">
+      <h2>战前选卡</h2>
+      <p class="ds-sub">拖拽卡牌到右侧「我的卡组」区域 · 怪兽选1种=自动带3张 · 冲突时投骰子决定归属</p>
+    </div>
+    <div class="ds-layout">
+      <div class="ds-pools">
+        <div class="ds-pool">
+          <div class="ds-pool-title">怪兽池（选1种=3张，最多10种）</div>
+          <div class="ds-pool-cards" id="ds-monster-pool"></div>
+        </div>
+        <div class="ds-pool">
+          <div class="ds-pool-title">事件卡池（最多4张）</div>
+          <div class="ds-pool-cards" id="ds-event-pool"></div>
+        </div>
+        <div class="ds-pool">
+          <div class="ds-pool-title">增益/减益/陷阱池（各最多2张）</div>
+          <div class="ds-pool-cards" id="ds-spell-pool"></div>
+        </div>
+        <div class="ds-pool">
+          <div class="ds-pool-title">虚影技能池（选1个，一次性效果带冷却）</div>
+          <div class="ds-pool-cards" id="ds-skill-pool"></div>
+        </div>
+      </div>
+      <div class="ds-mine" id="ds-mine-drop">
+        <div class="ds-mine-title">我的卡组</div>
+        <div class="ds-mine-section">
+          <div class="ds-ms-label">怪兽 <span id="ds-monster-cnt">0</span>种 = <span id="ds-monster-total">0</span>张</div>
+          <div class="ds-mine-cards" id="ds-mine-monsters"></div>
+        </div>
+        <div class="ds-mine-section">
+          <div class="ds-ms-label">事件卡 <span id="ds-event-cnt">0</span>/4</div>
+          <div class="ds-mine-cards" id="ds-mine-events"></div>
+        </div>
+        <div class="ds-mine-section">
+          <div class="ds-ms-label">增益 <span id="ds-buff-cnt">0</span>/2 · 减益 <span id="ds-debuff-cnt">0</span>/2 · 陷阱 <span id="ds-trap-cnt">0</span>/2</div>
+          <div class="ds-mine-cards" id="ds-mine-spells"></div>
+        </div>
+        <div class="ds-mine-section">
+          <div class="ds-ms-label">虚影技能 <span id="ds-skill-cnt">0</span>/1</div>
+          <div class="ds-mine-cards" id="ds-mine-skill"></div>
+        </div>
+        <div class="ds-summary" id="ds-summary">卡组总计：0张（上限40）</div>
+        <div class="ds-btns">
+          <button id="ds-confirm" class="ds-btn">确认选卡</button>
+          <button id="ds-cancel" class="ds-btn alt">返回菜单</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 选卡冲突骰子弹窗 -->
+<div id="ds-dice-overlay" class="hidden">
+  <div class="ds-dice-box">
+    <h3 id="ds-dice-title">卡牌冲突</h3>
+    <p id="ds-dice-desc"></p>
+    <div class="ds-dice-area">
+      <div class="ds-dice-side"><span>你的点数</span><b id="ds-dice-p">?</b></div>
+      <div class="ds-dice-vs">VS</div>
+      <div class="ds-dice-side"><span>对手点数</span><b id="ds-dice-ai">?</b></div>
+    </div>
+    <p id="ds-dice-result"></p>
+    <button id="ds-dice-roll" class="ds-btn">投骰子</button>
   </div>
 </div>
 <div id="app">
@@ -1638,19 +1757,58 @@ const ART = {
   holo_saguros_mon:'https://aka.doubaocdn.com/s/ezxKH8ShIP'
 };
 
-/* 10 种怪兽（每种 3 张），hp 为固定生命值 */
+/* 10 种基础怪兽（每种 3 张），hp 为固定生命值，race 为种族（用于种族针对陷阱） */
 const MONSTER_DEFS = [
-  { id:'rat_swarm', name:'波希的鼠群', atk:1000, def:1200, hp:3000 },
-  { id:'shark', name:'最强之喀秋鲨', atk:2000, def:1800, hp:3000 },
-  { id:'mantis', name:'飞天螳螂', atk:1800, def:1000, hp:1500 },
-  { id:'dancer', name:'旋动的幽蓝舞曲', atk:1500, def:1500, hp:1800 },
-  { id:'trimind', name:'三身佛心魔', atk:1600, def:2000, hp:1800 },
-  { id:'mad_dog', name:'狂狗', atk:1700, def:1200, hp:1400 },
-  { id:'armor', name:'荒芜的骑士甲胄', atk:1600, def:1600, hp:2500 },
-  { id:'frost', name:'冰冻恐惧者', atk:1900, def:1500, hp:2000 },
-  { id:'passenger', name:'大声疾呼的乘船客', atk:1300, def:1700, hp:1400 },
-  { id:'book', name:'鸿上尚史书', atk:1500, def:1750, hp:900 }
+  { id:'rat_swarm', name:'波希的鼠群', atk:1000, def:1200, hp:3000, race:'兽族' },
+  { id:'shark', name:'最强之喀秋鲨', atk:2000, def:1800, hp:3000, race:'鱼族' },
+  { id:'mantis', name:'飞天螳螂', atk:1800, def:1000, hp:1500, race:'昆虫族' },
+  { id:'dancer', name:'旋动的幽蓝舞曲', atk:1500, def:1500, hp:1800, race:'天使族' },
+  { id:'trimind', name:'三身佛心魔', atk:1600, def:2000, hp:1800, race:'恶魔族' },
+  { id:'mad_dog', name:'狂狗', atk:1700, def:1200, hp:1400, race:'兽族' },
+  { id:'armor', name:'荒芜的骑士甲胄', atk:1600, def:1600, hp:2500, race:'机械族' },
+  { id:'frost', name:'冰冻恐惧者', atk:1900, def:1500, hp:2000, race:'水族' },
+  { id:'passenger', name:'大声疾呼的乘船客', atk:1300, def:1700, hp:1400, race:'兽族' },
+  { id:'book', name:'鸿上尚史书', atk:1500, def:1750, hp:900, race:'魔法族' }
 ];
+
+/* ============================================================
+   战前选卡扩展卡池（v2.0）
+   ============================================================ */
+/* 30 张新增怪兽卡（ATK+DEF+HP 总和在 4000~7000 之间），选1种=自动带3张 */
+const MONSTER_POOL_EXTRA = [
+  { id:'m01', name:'暗影岩甲兽', atk:1800, def:1600, hp:1200, race:'兽族' },
+  { id:'m02', name:'幽焰飞隼', atk:2200, def:900, hp:1400, race:'鸟兽族' },
+  { id:'m03', name:'腐沼巨螯', atk:1500, def:2000, hp:1300, race:'水族' },
+  { id:'m04', name:'虚空鳞蜥', atk:1900, def:1300, hp:1600, race:'龙族' },
+  { id:'m05', name:'枯木树人', atk:1200, def:2100, hp:1500, race:'植物族' },
+  { id:'m06', name:'陨铁战犀', atk:2400, def:1700, hp:1100, race:'机械族' },
+  { id:'m07', name:'冥河水母', atk:1100, def:1400, hp:1800, race:'水族' },
+  { id:'m08', name:'骨刃狼骑', atk:2100, def:1200, hp:1700, race:'不死族' },
+  { id:'m09', name:'瘴气蛞蝓王', atk:1000, def:1800, hp:1600, race:'水族' },
+  { id:'m10', name:'碎晶巨像', atk:1700, def:2300, hp:1500, race:'岩石族' },
+  { id:'m11', name:'幻雾灵狐', atk:1600, def:1100, hp:1900, race:'兽族' },
+  { id:'m12', name:'熔岩寄居龟', atk:1400, def:2400, hp:1300, race:'水族' },
+  { id:'m13', name:'丧钟渡鸦', atk:2000, def:1000, hp:1800, race:'鸟兽族' },
+  { id:'m14', name:'沙蚀蠕虫', atk:1300, def:1500, hp:2000, race:'昆虫族' },
+  { id:'m15', name:'幽铠魔马', atk:2300, def:1600, hp:1400, race:'恶魔族' },
+  { id:'m16', name:'苔原巨蚺', atk:1500, def:1700, hp:1700, race:'龙族' },
+  { id:'m17', name:'暗潮剑鱼', atk:2200, def:1400, hp:1300, race:'鱼族' },
+  { id:'m18', name:'锈铜守卫', atk:1100, def:2500, hp:1200, race:'机械族' },
+  { id:'m19', name:'血月蝙蝠群', atk:1800, def:800, hp:2100, race:'鸟兽族' },
+  { id:'m20', name:'灰岩多头虫', atk:1600, def:1900, hp:1600, race:'昆虫族' },
+  { id:'m21', name:'星陨幼龙', atk:2500, def:1300, hp:1500, race:'龙族' },
+  { id:'m22', name:'死寂花妖', atk:1200, def:1600, hp:2000, race:'植物族' },
+  { id:'m23', name:'黑岩猛犸', atk:2100, def:2200, hp:1400, race:'兽族' },
+  { id:'m24', name:'深渊盲虾', atk:1400, def:1200, hp:1900, race:'水族' },
+  { id:'m25', name:'魂火蜉蝣', atk:1700, def:900, hp:2200, race:'昆虫族' },
+  { id:'m26', name:'古藤巨蛛', atk:1900, def:1800, hp:1500, race:'昆虫族' },
+  { id:'m27', name:'冰封石蟾', atk:1300, def:2200, hp:1600, race:'水族' },
+  { id:'m28', name:'蚀骨沙虫', atk:2000, def:1500, hp:1700, race:'昆虫族' },
+  { id:'m29', name:'幽光巨章', atk:1500, def:2000, hp:1800, race:'水族' },
+  { id:'m30', name:'亡骸战熊', atk:2200, def:1800, hp:1600, race:'不死族' }
+];
+/* 全部怪兽池（基础10 + 新增30 = 40种，选卡界面用） */
+const ALL_MONSTERS = [...MONSTER_DEFS, ...MONSTER_POOL_EXTRA];
 
 const SPELLS = [
   { id:'life_frenzy', name:'生命狂热', kind:'buff', a:500, d:300, desc:'目标怪兽攻击力 +500、守备力 +300' },
@@ -1663,6 +1821,83 @@ const CURSES = [
 const TRAPS = [
   { id:'flash_damage', name:'高亮伤害', desc:'当攻击表示怪兽消灭守备表示怪兽并将伤害延伸到玩家身上时，消灭该怪兽' },
   { id:'good_morning', name:'早安现在', desc:'当减益卡对己方生效时，将其变为增益（减少的变为增多的）' }
+];
+
+/* ============================================================
+   战前选卡扩展卡池（v2.0）：增益/减益/陷阱各10张新卡
+   ============================================================ */
+/* 10 张新增增益卡（数值区间 300~500，一次性效果，无持续时间） */
+const BUFF_POOL_EXTRA = [
+  { id:'b01', name:'狂化冲锋', kind:'buff', a:500, d:0, desc:'目标怪兽攻击力 +500' },
+  { id:'b02', name:'钢鳞强化', kind:'buff', a:0, d:500, desc:'目标怪兽守备力 +500' },
+  { id:'b03', name:'幽能灌注', kind:'buff', a:300, d:300, desc:'目标怪兽攻击力 +300、守备力 +300' },
+  { id:'b04', name:'战意激昂', kind:'buff', a:400, d:100, desc:'目标怪兽攻击力 +400、守备力 +100' },
+  { id:'b05', name:'铁壁守护', kind:'buff', a:100, d:400, desc:'目标怪兽攻击力 +100、守备力 +400' },
+  { id:'b06', name:'龙魂觉醒', kind:'buff', a:450, d:150, desc:'目标怪兽攻击力 +450、守备力 +150' },
+  { id:'b07', name:'圣盾加护', kind:'buff', a:150, d:450, desc:'目标怪兽攻击力 +150、守备力 +450' },
+  { id:'b08', name:'狂暴之力', kind:'buff', a:350, d:200, desc:'目标怪兽攻击力 +350、守备力 +200' },
+  { id:'b09', name:'坚韧体魄', kind:'buff', a:200, d:350, desc:'目标怪兽攻击力 +200、守备力 +350' },
+  { id:'b10', name:'均衡祝福', kind:'buff', a:250, d:250, desc:'目标怪兽攻击力 +250、守备力 +250' }
+];
+/* 全部增益卡池（基础2 + 新增10 = 12张） */
+const ALL_BUFFS = [...SPELLS, ...BUFF_POOL_EXTRA];
+
+/* 10 张新增减益卡（数值区间 300~500，一次性效果，无持续时间） */
+const DEBUFF_POOL_EXTRA = [
+  { id:'d01', name:'蚀甲诅咒', kind:'debuff', a:500, d:0, desc:'敌方怪兽攻击力 -500' },
+  { id:'d02', name:'腐朽瘴气', kind:'debuff', a:0, d:500, desc:'敌方怪兽守备力 -500' },
+  { id:'d03', name:'虚弱烙印', kind:'debuff', a:300, d:300, desc:'敌方怪兽攻击力 -300、守备力 -300' },
+  { id:'d04', name:'战意瓦解', kind:'debuff', a:400, d:100, desc:'敌方怪兽攻击力 -400、守备力 -100' },
+  { id:'d05', name:'护甲碎裂', kind:'debuff', a:100, d:400, desc:'敌方怪兽攻击力 -100、守备力 -400' },
+  { id:'d06', name:'龙魂封印', kind:'debuff', a:450, d:150, desc:'敌方怪兽攻击力 -450、守备力 -150' },
+  { id:'d07', name:'圣盾剥离', kind:'debuff', a:150, d:450, desc:'敌方怪兽攻击力 -150、守备力 -450' },
+  { id:'d08', name:'狂暴抑制', kind:'debuff', a:350, d:200, desc:'敌方怪兽攻击力 -350、守备力 -200' },
+  { id:'d09', name:'坚韧削弱', kind:'debuff', a:200, d:350, desc:'敌方怪兽攻击力 -200、守备力 -350' },
+  { id:'d10', name:'均衡诅咒', kind:'debuff', a:250, d:250, desc:'敌方怪兽攻击力 -250、守备力 -250' }
+];
+/* 全部减益卡池（基础2 + 新增10 = 12张） */
+const ALL_DEBUFFS = [...CURSES, ...DEBUFF_POOL_EXTRA];
+
+/* 10 张新增陷阱卡（种族针对 + 攻击次数限制） */
+const TRAP_POOL_EXTRA = [
+  { id:'t01', name:'龙族之敌', kind:'race_trap', targetRace:'龙族', desc:'当龙族怪兽攻击时，消灭该龙族怪兽' },
+  { id:'t02', name:'兽族之敌', kind:'race_trap', targetRace:'兽族', desc:'当兽族怪兽攻击时，消灭该兽族怪兽' },
+  { id:'t03', name:'昆虫族之敌', kind:'race_trap', targetRace:'昆虫族', desc:'当昆虫族怪兽攻击时，消灭该昆虫族怪兽' },
+  { id:'t04', name:'恶魔族之敌', kind:'race_trap', targetRace:'恶魔族', desc:'当恶魔族怪兽攻击时，消灭该恶魔族怪兽' },
+  { id:'t05', name:'机械族之敌', kind:'race_trap', targetRace:'机械族', desc:'当机械族怪兽攻击时，消灭该机械族怪兽' },
+  { id:'t06', name:'水族之敌', kind:'race_trap', targetRace:'水族', desc:'当水族怪兽攻击时，消灭该水族怪兽' },
+  { id:'t07', name:'鸟兽族之敌', kind:'race_trap', targetRace:'鸟兽族', desc:'当鸟兽族怪兽攻击时，消灭该鸟兽族怪兽' },
+  { id:'t08', name:'不死族之敌', kind:'race_trap', targetRace:'不死族', desc:'当不死族怪兽攻击时，消灭该不死族怪兽' },
+  { id:'t09', name:'植物族之敌', kind:'race_trap', targetRace:'植物族', desc:'当植物族怪兽攻击时，消灭该植物族怪兽' },
+  { id:'t10', name:'连击制裁', kind:'combo_trap', desc:'当对方一回合内攻击次数超过3次时，消灭对方最后攻击的那张怪兽卡' }
+];
+/* 全部陷阱卡池（基础2 + 新增10 = 12张） */
+const ALL_TRAPS = [...TRAPS, ...TRAP_POOL_EXTRA];
+
+/* ============================================================
+   虚影技能池（15个，一次性效果，无持续时间，带回合冷却1~5）
+   ============================================================ */
+const SKILL_POOL = [
+  /* 攻击类（3个）：场上有敌方怪兽时必须先打怪兽，无怪兽才能打虚影 */
+  { id:'sk01', name:'暗影穿刺', kind:'attack', cd:2, value:600, desc:'对敌方目标造成600点伤害（有怪兽时优先打怪兽）' },
+  { id:'sk02', name:'碎骨猛击', kind:'attack', cd:3, value:800, desc:'对敌方目标造成800点伤害（有怪兽时优先打怪兽）' },
+  { id:'sk03', name:'暗矢齐射', kind:'attack', cd:1, value:300, desc:'对敌方目标造成300点伤害（有怪兽时优先打怪兽）' },
+  /* 防御护盾类（3个）：给目标加防护罩，优先抵消伤害 */
+  { id:'sk04', name:'幽冥屏障', kind:'shield', cd:4, value:700, desc:'给目标增加700点防护罩，优先抵消受到的伤害' },
+  { id:'sk05', name:'石肤外壳', kind:'shield', cd:3, value:450, desc:'给目标增加450点防护罩，优先抵消受到的伤害' },
+  { id:'sk06', name:'幻影幕帘', kind:'shield', cd:5, value:900, desc:'给目标增加900点防护罩，优先抵消受到的伤害' },
+  /* 回复类（3个）：给虚影或怪兽回复生命值，不超过原始上限 */
+  { id:'sk07', name:'冥愈之光', kind:'heal', cd:2, value:400, desc:'回复目标400点生命值（不可超过原始上限）' },
+  { id:'sk08', name:'枯荣回流', kind:'heal', cd:3, value:750, desc:'回复目标750点生命值（不可超过原始上限）' },
+  { id:'sk09', name:'魂息滋养', kind:'heal', cd:4, value:550, desc:'回复目标550点生命值（不可超过原始上限）' },
+  /* 增益类（3个）：一次性增加攻击力/守备力，套用增益卡规则 */
+  { id:'sk10', name:'狂化冲锋术', kind:'buff', cd:3, a:400, d:0, desc:'指定怪兽攻击力 +400（一次性，套用增益卡规则）' },
+  { id:'sk11', name:'钢鳞强化术', kind:'buff', cd:2, a:0, d:500, desc:'指定怪兽守备力 +500（一次性，套用增益卡规则）' },
+  { id:'sk12', name:'幽能灌注术', kind:'buff', cd:4, a:300, d:300, desc:'指定怪兽攻击力 +300、守备力 +300（一次性）' },
+  /* 减益类（3个）：一次性减少敌方怪兽攻击力/守备力，套用减益卡规则 */
+  { id:'sk13', name:'蚀甲诅咒术', kind:'debuff', cd:3, a:450, d:0, desc:'敌方怪兽攻击力 -450（一次性，套用减益卡规则）' },
+  { id:'sk14', name:'腐朽瘴气术', kind:'debuff', cd:2, a:0, d:350, desc:'敌方怪兽守备力 -350（一次性，套用减益卡规则）' },
+  { id:'sk15', name:'虚弱烙印术', kind:'debuff', cd:4, a:250, d:250, desc:'敌方怪兽攻击力 -250、守备力 -250（一次性）' }
 ];
 /* 事件卡池（14 张：8 原型 + 四首百怪 + 萨格罗斯 + 千手不能绝 + 大化龙术 + 堕入地狱 + 龙傲天骄；开局从中随机抽 8 张均分给双方） */
 const EVENT_DEFS = [
@@ -1702,10 +1937,10 @@ const EVENT_TPL_DESC = {
 for(const e of EVENT_DEFS) e.art = (EVENT_DEFS.find(x=>x.tpl===e.tpl)||{}).id || e.id;
 
 const CARD_BY_ID = {};
-for(const m of MONSTER_DEFS) CARD_BY_ID[m.id] = { ...m, type:'monster' };
-for(const s of SPELLS) CARD_BY_ID[s.id] = { ...s, type:'spell' };
-for(const c of CURSES) CARD_BY_ID[c.id] = { ...c, type:'spell' };
-for(const t of TRAPS) CARD_BY_ID[t.id] = { ...t, type:'trap' };
+for(const m of ALL_MONSTERS) CARD_BY_ID[m.id] = { ...m, type:'monster' };
+for(const s of ALL_BUFFS) CARD_BY_ID[s.id] = { ...s, type:'spell' };
+for(const c of ALL_DEBUFFS) CARD_BY_ID[c.id] = { ...c, type:'spell' };
+for(const t of ALL_TRAPS) CARD_BY_ID[t.id] = { ...t, type:'trap' };
 for(const e of EVENT_DEFS) CARD_BY_ID[e.id] = { ...e, type:'event', desc: e.desc || EVENT_TPL_DESC[e.tpl] || '事件卡' };
 CARD_BY_ID['ultimate_roar'] = { id:'ultimate_roar', name:'轰穹龙', type:'monster', atk:3000, def:2000, hp:4000 };
 CARD_BY_ID['purple_witch'] = { id:'purple_witch', name:'紫衣妖女', type:'monster', atk:2500, def:1000, hp:3000 };
@@ -1761,13 +1996,16 @@ function pickEvents(){
   if(Math.random() < 0.5) return { P:h1, AI:h2 };
   return { P:h2, AI:h1 };
 }
-function buildDeck(events){
+/* 战前选卡结果（全局）：{ monsters:[id], buffs:[id], debuffs:[id], traps:[id], events:[id], skill:id } */
+let DECK_SELECT = null;
+function buildDeck(sel){
   const deck = [];
-  for(const m of MONSTER_DEFS) for(let i=0;i<3;i++) deck.push(m.id);
-  for(const s of SPELLS) deck.push(s.id);
-  for(const c of CURSES) deck.push(c.id);
-  for(const t of TRAPS) deck.push(t.id);
-  deck.push(...events);
+  // 怪兽：选1种=自动带3张
+  for(const mid of (sel.monsters||[])) for(let i=0;i<3;i++) deck.push(mid);
+  for(const bid of (sel.buffs||[])) deck.push(bid);
+  for(const did of (sel.debuffs||[])) deck.push(did);
+  for(const tid of (sel.traps||[])) deck.push(tid);
+  deck.push(...(sel.events||[]));
   return shuffle(deck);
 }
 
@@ -1783,7 +2021,8 @@ function freshPlayer(){
     lp:8000, deck:[], hand:[], mz:Array(5).fill(null),
     traps:Array(3).fill(null), grave:[],
     events:[], nextSameDraw:false, fatePending:false, summoned:false, drew:false, posChanged:false,
-    strongLuck:0, qianshou:null, hell:false
+    strongLuck:0, qianshou:null, hell:false,
+    skill:null, skillCd:0, selfDestructUsed:false, attackCount:0
   };
 }
 function resetGame(){
@@ -1800,11 +2039,22 @@ function resetGame(){
     auditMeta:{ startedAt:new Date().toISOString(), mode:((G&&G.net)?G.net.mode:'solo')||'solo', firstAtk:null, dice:null, endedAt:null, result:null },
     net:(G && G.net) ? G.net : { mode:'solo' }
   };
-  const ev = pickEvents();
-  G.players[P].events = ev.P;
-  G.players[AI].events = ev.AI;
-  G.players[P].deck = buildDeck(G.players[P].events);
-  G.players[AI].deck = buildDeck(G.players[AI].events);
+  // 战前选卡：如果有选卡结果则使用，否则回退到旧的随机分配（兼容直接 resetGame）
+  if(DECK_SELECT && DECK_SELECT.P && DECK_SELECT.AI){
+    G.players[P].events = DECK_SELECT.P.events||[];
+    G.players[AI].events = DECK_SELECT.AI.events||[];
+    G.players[P].deck = buildDeck(DECK_SELECT.P);
+    G.players[AI].deck = buildDeck(DECK_SELECT.AI);
+    G.players[P].skill = DECK_SELECT.P.skill||null;
+    G.players[AI].skill = DECK_SELECT.AI.skill||null;
+  }else{
+    const ev = pickEvents();
+    G.players[P].events = ev.P;
+    G.players[AI].events = ev.AI;
+    const fallbackSel = (evs)=>({ monsters:MONSTER_DEFS.map(m=>m.id), buffs:SPELLS.map(s=>s.id), debuffs:CURSES.map(c=>c.id), traps:TRAPS.map(t=>t.id), events:evs });
+    G.players[P].deck = buildDeck(fallbackSel(ev.P));
+    G.players[AI].deck = buildDeck(fallbackSel(ev.AI));
+  }
   // 开局各抽 5 张
   drawCards(P, 5);
   drawCards(AI, 5);
@@ -2543,6 +2793,8 @@ function startTurn(){
     pl.refused = {};        // 融合拒绝标记重置
     pl.remindNoDraw = false;// 未抽卡提醒标记重置
     pl.posChanged = false;  // 每回合一次的攻击/守备切换机会重置
+    pl.selfDestructUsed = false; // 每回合一次的自灭机会重置
+    pl.attackCount = 0;     // 本回合攻击次数重置（用于连击制裁陷阱）
     if(pl.hell){
       pl.lp = Math.max(0, pl.lp - 1000);
       log(`「堕入地狱」：${p===P?'你的':'对手的'}生命值 -1000！`,'effect');
@@ -2785,11 +3037,14 @@ async function showMonDetail(m, owner, slot){
   const posTxt = m.pos==='atk' ? '攻击表示' : '守备表示';
   const eff = (m.eff || (c ? (c.desc||'无') : '无'));
   const canSwap = !m.noDef && owner===P && G.active===P && !G.busy && G.phase==='main' && G.winner===null && !G.players[P].posChanged;
+  const canSelfDestruct = owner===P && G.active===P && !G.busy && G.phase==='main' && G.winner===null && !G.players[P].selfDestructUsed;
+  const race = (m.race || (c&&c.race) || '未知');
   const r = await showModal({
     title: m.name,
     body: `<div style="display:flex;gap:14px;align-items:flex-start">
       <div style="width:112px;flex:0 0 112px;border-radius:10px;overflow:hidden;border:2px solid var(--line-2)"><img src="${artOf(m)}" style="width:100%;display:block"></div>
       <div style="flex:1;font-size:13px;line-height:1.85">
+        <p><b>种族：</b>${race}</p>
         <p><b>类型：</b>怪兽 · ${posTxt}${m.fused?' · 融合':''}</p>
         <p><b>攻击力：</b>${m.atk}${m.buffA?` <span style="color:var(--ok);font-size:11px">(增益 +${m.buffA})</span>`:''}</p>
         <p><b>守备力：</b>${m.def}${m.buffD?` <span style="color:var(--ok);font-size:11px">(增益 +${m.buffD})</span>`:''}（固定，攻击不减少）</p>
@@ -2798,6 +3053,7 @@ async function showMonDetail(m, owner, slot){
       </div></div>`,
     buttons:[
       ...(canSwap ? [{label:m.pos==='atk'?'切换为守备表示':'切换为攻击表示', value:'swap'}] : []),
+      ...(canSelfDestruct ? [{label:'自灭（进入墓地）', value:'selfdestruct', cls:'danger'}] : []),
       {label:'知道了', cls:'primary', value:1}
     ]
   });
@@ -2809,6 +3065,17 @@ async function showMonDetail(m, owner, slot){
     netLog(`你已将「${m.name}」切换为${m.pos==='atk'?'攻击':'守备'}表示（本回合已用过切换机会）`,'effect');
     if(netIsHost()) netBroadcast();
     renderAll();
+  }else if(r==='selfdestruct'){
+    if(netIsGuest()){ netSendOp('self_destruct', { slot }); return; }
+    G.players[P].selfDestructUsed = true;
+    pushGraveMon(P, m);
+    G.players[P].mz[slot] = null;
+    log(`你将「${m.name}」自灭，进入墓地（本回合自灭机会已用）`,'effect');
+    netLog(`你将「${m.name}」自灭，进入墓地（本回合自灭机会已用）`,'effect');
+    fxHolo(P, slot, m, 'bad');
+    if(netIsHost()) netBroadcast();
+    renderAll();
+    if(!G.winner){ await autoNecro(P); await autoNecro(AI); }
   }
 }
 /* 墓地查看：死亡的怪兽卡 / 使用过的增益减益陷阱事件卡 */
@@ -6362,28 +6629,319 @@ function showMenu(){
   const rs = $('#result-screen'); if(rs){ rs.classList.add('hidden'); rs.innerHTML=''; }
   const st = $('#menu-status'); if(st){ st.textContent=''; st.className='menu-status'; }
 }
-function startSolo(){
+
+/* ============================================================
+   战前选卡界面（v2.0）：4个池子 + 拖拽 + 冲突骰子 + AI选卡
+   ============================================================ */
+let DS = null; // { mode, mine:{monsters:[],events:[],buffs:[],debuffs:[],traps:[],skill:null}, ai:{...}, conflicts:[], pendingConfirm:false }
+function dsCardHTML(card, pool){
+  const c = card.id ? card : cardById(card);
+  if(!c) return '';
+  const isMonster = c.type==='monster' || pool==='monster';
+  const stats = isMonster ? `<div class="ds-card-stats"><span>攻${c.atk}</span><span>守${c.def}</span></div>` : '';
+  const race = (c.race && isMonster) ? `<span style="position:absolute;top:1px;left:50%;transform:translateX(-50%);font-size:7px;color:#ffd700;text-shadow:0 0 2px #000;">${c.race}</span>` : '';
+  return `<div class="ds-card" draggable="true" data-id="${c.id}" data-pool="${pool}" title="${c.name}：${c.desc||''}">
+    <img src="${artOf(c)}" alt="${c.name}" onerror="this.src='${ART.cardback}'">
+    ${race}${stats}
+    <div class="ds-card-name">${c.name}</div>
+  </div>`;
+}
+function renderDSPools(){
+  // 怪兽池：全部40种（基础10+新增30）
+  let html = '';
+  for(const m of ALL_MONSTERS){
+    const taken = DS.mine.monsters.includes(m.id) || (DS.ai&&DS.ai.monsters.includes(m.id));
+    html += `<div class="ds-card${taken?' selected':''}" draggable="true" data-id="${m.id}" data-pool="monster" title="${m.name}（${m.race}）攻${m.atk}守${m.def}生命${m.hp}">
+      <img src="${artOf(m)}" alt="${m.name}"><span style="position:absolute;top:1px;left:50%;transform:translateX(-50%);font-size:7px;color:#ffd700;text-shadow:0 0 2px #000;">${m.race}</span>
+      <div class="ds-card-stats"><span>攻${m.atk}</span><span>守${m.def}</span></div>
+      <div class="ds-card-name">${m.name}</div></div>`;
+  }
+  $('#ds-monster-pool').innerHTML = html;
+  // 事件卡池
+  html = '';
+  for(const e of EVENT_DEFS){
+    if(e.id==='hell'||e.id==='arrogant') continue; // 极端骰专属，不进选卡池
+    const taken = DS.mine.events.includes(e.id) || (DS.ai&&DS.ai.events.includes(e.id));
+    html += dsCardHTML({...e, type:'event', desc:EVENT_TPL_DESC[e.tpl]||'事件卡'}, 'event').replace('ds-card"','ds-card'+(taken?' selected':''));
+  }
+  $('#ds-event-pool').innerHTML = html;
+  // 增益/减益/陷阱池
+  html = '';
+  for(const b of ALL_BUFFS){ const taken=DS.mine.buffs.includes(b.id); html += dsCardHTML({...b,type:'spell'},'buff').replace('ds-card"','ds-card'+(taken?' selected':'')); }
+  for(const d of ALL_DEBUFFS){ const taken=DS.mine.debuffs.includes(d.id); html += dsCardHTML({...d,type:'spell'},'debuff').replace('ds-card"','ds-card'+(taken?' selected':'')); }
+  for(const t of ALL_TRAPS){ const taken=DS.mine.traps.includes(t.id); html += dsCardHTML({...t,type:'trap'},'trap').replace('ds-card"','ds-card'+(taken?' selected':'')); }
+  $('#ds-spell-pool').innerHTML = html;
+  // 虚影技能池
+  html = '';
+  for(const s of SKILL_POOL){
+    const taken = DS.mine.skill===s.id;
+    html += `<div class="ds-card${taken?' selected':''}" draggable="true" data-id="${s.id}" data-pool="skill" title="${s.name}（${s.kind}）冷却${s.cd}回合：${s.desc}">
+      <img src="${ART.cardback}" alt="${s.name}"><div class="ds-card-stats"><span>CD${s.cd}</span><span>${s.kind==='attack'?'攻击':s.kind==='shield'?'护盾':s.kind==='heal'?'回复':s.kind==='buff'?'增益':'减益'}</span></div>
+      <div class="ds-card-name">${s.name}</div></div>`;
+  }
+  $('#ds-skill-pool').innerHTML = html;
+  bindDSDrag();
+}
+function renderDSMine(){
+  const m = DS.mine;
+  // 怪兽
+  let html = '';
+  for(const id of m.monsters){ const c=cardById(id); html += `<div class="ds-mine-card" data-id="${id}" data-pool="monster"><img src="${artOf(c)}"><div class="ds-remove" data-id="${id}" data-pool="monster">×</div></div>`; }
+  $('#ds-mine-monsters').innerHTML = html;
+  $('#ds-monster-cnt').textContent = m.monsters.length;
+  $('#ds-monster-total').textContent = m.monsters.length*3;
+  // 事件
+  html = '';
+  for(const id of m.events){ const c=cardById(id); html += `<div class="ds-mine-card" data-id="${id}" data-pool="event"><img src="${artOf(c)}"><div class="ds-remove" data-id="${id}" data-pool="event">×</div></div>`; }
+  $('#ds-mine-events').innerHTML = html;
+  $('#ds-event-cnt').textContent = m.events.length;
+  // 增益/减益/陷阱
+  html = '';
+  for(const id of [...m.buffs,...m.debuffs,...m.traps]){ const c=cardById(id); const pool=m.buffs.includes(id)?'buff':m.debuffs.includes(id)?'debuff':'trap'; html += `<div class="ds-mine-card" data-id="${id}" data-pool="${pool}"><img src="${artOf(c)}"><div class="ds-remove" data-id="${id}" data-pool="${pool}">×</div></div>`; }
+  $('#ds-mine-spells').innerHTML = html;
+  $('#ds-buff-cnt').textContent = m.buffs.length;
+  $('#ds-debuff-cnt').textContent = m.debuffs.length;
+  $('#ds-trap-cnt').textContent = m.traps.length;
+  // 技能
+  html = '';
+  if(m.skill){ const s=SKILL_POOL.find(x=>x.id===m.skill); html += `<div class="ds-mine-card" data-id="${m.skill}" data-pool="skill"><img src="${ART.cardback}"><div class="ds-remove" data-id="${m.skill}" data-pool="skill">×</div></div>`; }
+  $('#ds-mine-skill').innerHTML = html;
+  $('#ds-skill-cnt').textContent = m.skill?1:0;
+  // 总计
+  const total = m.monsters.length*3 + m.buffs.length + m.debuffs.length + m.traps.length + m.events.length;
+  $('#ds-summary').textContent = `卡组总计：${total}张（上限40）`;
+  $('#ds-summary').style.color = total>40?'#ef4444':'#a8c0f0';
+  // 移除按钮绑定
+  document.querySelectorAll('#ds-mine-drop .ds-remove').forEach(el=>{
+    el.onclick = (e)=>{ e.stopPropagation(); dsRemove(el.dataset.id, el.dataset.pool); };
+  });
+}
+function dsAdd(id, pool){
+  const m = DS.mine;
+  if(pool==='monster'){
+    if(m.monsters.includes(id)){ toast('已选择该怪兽'); return; }
+    if(m.monsters.length>=10){ toast('最多选10种怪兽（30张）'); return; }
+    m.monsters.push(id);
+  }else if(pool==='event'){
+    if(m.events.includes(id)){ toast('已选择该事件卡'); return; }
+    if(m.events.length>=4){ toast('最多选4张事件卡'); return; }
+    m.events.push(id);
+  }else if(pool==='buff'){
+    if(m.buffs.includes(id)){ toast('已选择该增益卡'); return; }
+    if(m.buffs.length>=2){ toast('最多选2张增益卡'); return; }
+    m.buffs.push(id);
+  }else if(pool==='debuff'){
+    if(m.debuffs.includes(id)){ toast('已选择该减益卡'); return; }
+    if(m.debuffs.length>=2){ toast('最多选2张减益卡'); return; }
+    m.debuffs.push(id);
+  }else if(pool==='trap'){
+    if(m.traps.includes(id)){ toast('已选择该陷阱卡'); return; }
+    if(m.traps.length>=2){ toast('最多选2张陷阱卡'); return; }
+    m.traps.push(id);
+  }else if(pool==='skill'){
+    m.skill = id;
+  }
+  renderDSPools(); renderDSMine();
+}
+function dsRemove(id, pool){
+  const m = DS.mine;
+  if(pool==='monster') m.monsters = m.monsters.filter(x=>x!==id);
+  else if(pool==='event') m.events = m.events.filter(x=>x!==id);
+  else if(pool==='buff') m.buffs = m.buffs.filter(x=>x!==id);
+  else if(pool==='debuff') m.debuffs = m.debuffs.filter(x=>x!==id);
+  else if(pool==='trap') m.traps = m.traps.filter(x=>x!==id);
+  else if(pool==='skill') m.skill = null;
+  renderDSPools(); renderDSMine();
+}
+function bindDSDrag(){
+  document.querySelectorAll('#deck-select-overlay .ds-card[draggable]').forEach(el=>{
+    el.ondragstart = (e)=>{ e.dataTransfer.setData('text/plain', JSON.stringify({id:el.dataset.id, pool:el.dataset.pool})); el.classList.add('dragging'); };
+    el.ondragend = ()=>{ el.classList.remove('dragging'); };
+    el.onclick = ()=>{ showDSCardDetail(el.dataset.id, el.dataset.pool); };
+  });
+  const drop = $('#ds-mine-drop');
+  drop.ondragover = (e)=>{ e.preventDefault(); drop.classList.add('drag-over'); };
+  drop.ondragleave = ()=>{ drop.classList.remove('drag-over'); };
+  drop.ondrop = (e)=>{
+    e.preventDefault(); drop.classList.remove('drag-over');
+    try{ const d=JSON.parse(e.dataTransfer.getData('text/plain')); dsAdd(d.id, d.pool); }catch(err){}
+  };
+}
+function showDSCardDetail(id, pool){
+  let c = cardById(id);
+  if(pool==='skill'){ c = SKILL_POOL.find(x=>x.id===id); if(!c) return;
+    showModal({ title:c.name, body:`<p><b>类型：</b>虚影技能 · ${c.kind==='attack'?'攻击':c.kind==='shield'?'护盾':c.kind==='heal'?'回复':c.kind==='buff'?'增益':'减益'}</p><p><b>冷却：</b>${c.cd}回合</p><p><b>效果：</b>${c.desc}</p><p style="color:var(--dim);font-size:11px">一次性效果，无持续时间。使用后进入冷却，冷却结束可再次使用。</p>`, buttons:[{label:'选择此技能',value:'select'},{label:'关闭',cls:'primary',value:1}] }).then(r=>{ if(r==='select') dsAdd(id,'skill'); });
+    return;
+  }
+  if(!c) return;
+  const isMonster = c.type==='monster';
+  let body = `<div style="display:flex;gap:12px;align-items:flex-start"><div style="width:100px;flex:0 0 100px;border-radius:8px;overflow:hidden;border:2px solid var(--line-2)"><img src="${artOf(c)}" style="width:100%"></div><div style="flex:1;font-size:12.5px;line-height:1.8">`;
+  if(isMonster){ body += `<p><b>种族：</b>${c.race||'未知'}</p><p><b>攻击力：</b>${c.atk}</p><p><b>守备力：</b>${c.def}</p><p><b>生命值：</b>${c.hp}</p><p><b>总和：</b>${(c.atk||0)+(c.def||0)+(c.hp||0)}</p>`; }
+  else { body += `<p><b>类型：</b>${c.type==='spell'?(c.kind==='buff'?'增益':'减益'):c.type==='trap'?'陷阱':'事件'}</p>`; if(c.a!=null) body += `<p><b>攻击力：</b>${c.a>=0?'+':''}${c.a}</p>`; if(c.d!=null) body += `<p><b>守备力：</b>${c.d>=0?'+':''}${c.d}</p>`; if(c.targetRace) body += `<p><b>针对种族：</b>${c.targetRace}</p>`; }
+  body += `<p><b>效果：</b>${c.desc||'无'}</p></div></div>`;
+  const canSelect = pool!=='monster' || !DS.mine.monsters.includes(id);
+  showModal({ title:c.name, body, buttons:[...(canSelect?[{label:'选择此卡',value:'select'}]:[]),{label:'关闭',cls:'primary',value:1}] }).then(r=>{ if(r==='select') dsAdd(id,pool); });
+}
+function validateDS(){
+  const m = DS.mine;
+  const total = m.monsters.length*3 + m.buffs.length + m.debuffs.length + m.traps.length + m.events.length;
+  if(m.monsters.length<1){ return '至少选择1种怪兽'; }
+  if(m.buffs.length<1){ return '至少选择1张增益卡'; }
+  if(m.debuffs.length<1){ return '至少选择1张减益卡'; }
+  if(m.traps.length<1){ return '至少选择1张陷阱卡'; }
+  if(m.events.length<1){ return '至少选择1张事件卡'; }
+  if(!m.skill){ return '请选择1个虚影技能'; }
+  if(total>40){ return `卡组超过40张（当前${total}张）`; }
+  return null;
+}
+/* AI 选卡：单机模式下随机选卡，且必须至少1张怪兽和1张事件卡与玩家相同 */
+function aiSelectDeck(){
+  const ai = { monsters:[], events:[], buffs:[], debuffs:[], traps:[], skill:null };
+  const pick = (arr, n, exclude=[]) => { const avail = arr.filter(x=>!exclude.includes(x.id)); const shuffled = shuffle([...avail]); return shuffled.slice(0,n).map(x=>x.id); };
+  // 怪兽：AI 必须至少1张与玩家相同
+  const sameMonster = DS.mine.monsters[Math.floor(Math.random()*DS.mine.monsters.length)];
+  ai.monsters.push(sameMonster);
+  const otherMonsters = pick(ALL_MONSTERS, 5, [sameMonster]);
+  ai.monsters.push(...otherMonsters);
+  // 事件：AI 必须至少1张与玩家相同
+  const sameEvent = DS.mine.events[Math.floor(Math.random()*DS.mine.events.length)];
+  ai.events.push(sameEvent);
+  const otherEvents = pick(EVENT_DEFS.filter(e=>e.id!=='hell'&&e.id!=='arrogant'), 2, [sameEvent]);
+  ai.events.push(...otherEvents);
+  // 增益/减益/陷阱
+  ai.buffs = pick(ALL_BUFFS, 2);
+  ai.debuffs = pick(ALL_DEBUFFS, 2);
+  ai.traps = pick(ALL_TRAPS, 2);
+  ai.skill = SKILL_POOL[Math.floor(Math.random()*SKILL_POOL.length)].id;
+  return ai;
+}
+/* 冲突检测：找出双方都选了的卡牌 */
+function findConflicts(){
+  const conflicts = [];
+  const mine = DS.mine, ai = DS.ai;
+  for(const id of mine.monsters) if(ai.monsters.includes(id)) conflicts.push({id, pool:'monster', name:cardById(id).name});
+  for(const id of mine.events) if(ai.events.includes(id)) conflicts.push({id, pool:'event', name:cardById(id).name});
+  for(const id of mine.buffs) if(ai.buffs.includes(id)) conflicts.push({id, pool:'buff', name:cardById(id).name});
+  for(const id of mine.debuffs) if(ai.debuffs.includes(id)) conflicts.push({id, pool:'debuff', name:cardById(id).name});
+  for(const id of mine.traps) if(ai.traps.includes(id)) conflicts.push({id, pool:'trap', name:cardById(id).name});
+  return conflicts;
+}
+/* 冲突骰子：逐个解决冲突 */
+let DS_CONFLICT_IDX = 0;
+function resolveNextConflict(){
+  const conflicts = DS.conflicts;
+  if(DS_CONFLICT_IDX >= conflicts.length){
+    // 所有冲突解决，开始游戏
+    $('#ds-dice-overlay').classList.add('hidden');
+    DECK_SELECT = { P:DS.mine, AI:DS.ai };
+    $('#deck-select-overlay').classList.add('hidden');
+    if(DS.mode==='solo'){ startSoloAfterSelect(); }
+    else if(DS.mode==='host'){ startHostAfterSelect(); }
+    return;
+  }
+  const c = conflicts[DS_CONFLICT_IDX];
+  $('#ds-dice-title').textContent = '卡牌冲突：' + c.name;
+  $('#ds-dice-desc').textContent = `双方都选择了「${c.name}」，投骰子决定归属（点数大者获得，小者重新选卡）`;
+  $('#ds-dice-p').textContent = '?';
+  $('#ds-dice-ai').textContent = '?';
+  $('#ds-dice-result').textContent = '';
+  $('#ds-dice-roll').style.display = '';
+  $('#ds-dice-overlay').classList.remove('hidden');
+}
+function dsRollDice(){
+  const p = Math.floor(Math.random()*6)+1;
+  const ai = Math.floor(Math.random()*6)+1;
+  $('#ds-dice-p').textContent = p;
+  $('#ds-dice-ai').textContent = ai;
+  const c = DS.conflicts[DS_CONFLICT_IDX];
+  if(p > ai){
+    $('#ds-dice-result').textContent = `你获得「${c.name}」！对手需要重新选卡`;
+    $('#ds-dice-result').style.color = '#4ade80';
+    // 从 AI 移除，AI 重新选一张同类型的
+    dsAiReplace(c);
+  }else if(ai > p){
+    $('#ds-dice-result').textContent = `对手获得「${c.name}」！你需要重新选卡`;
+    $('#ds-dice-result').style.color = '#ef4444';
+    // 从玩家移除
+    dsRemove(c.id, c.pool);
+  }else{
+    $('#ds-dice-result').textContent = '平局！重新投骰子';
+    $('#ds-dice-result').style.color = '#ffd700';
+    setTimeout(()=>{ $('#ds-dice-p').textContent='?'; $('#ds-dice-ai').textContent='?'; $('#ds-dice-result').textContent=''; }, 1000);
+    return; // 不推进
+  }
+  $('#ds-dice-roll').style.display = 'none';
+  DS_CONFLICT_IDX++;
+  setTimeout(resolveNextConflict, 1800);
+}
+function dsAiReplace(c){
+  const ai = DS.ai;
+  if(c.pool==='monster'){ ai.monsters = ai.monsters.filter(x=>x!==c.id); const avail=ALL_MONSTERS.filter(x=>!ai.monsters.includes(x.id)&&!DS.mine.monsters.includes(x.id)); if(avail.length) ai.monsters.push(avail[Math.floor(Math.random()*avail.length)].id); }
+  else if(c.pool==='event'){ ai.events = ai.events.filter(x=>x!==c.id); const avail=EVENT_DEFS.filter(x=>x.id!=='hell'&&x.id!=='arrogant'&&!ai.events.includes(x.id)&&!DS.mine.events.includes(x.id)); if(avail.length) ai.events.push(avail[Math.floor(Math.random()*avail.length)].id); }
+  else if(c.pool==='buff'){ ai.buffs = ai.buffs.filter(x=>x!==c.id); const avail=ALL_BUFFS.filter(x=>!ai.buffs.includes(x.id)); if(avail.length) ai.buffs.push(avail[Math.floor(Math.random()*avail.length)].id); }
+  else if(c.pool==='debuff'){ ai.debuffs = ai.debuffs.filter(x=>x!==c.id); const avail=ALL_DEBUFFS.filter(x=>!ai.debuffs.includes(x.id)); if(avail.length) ai.debuffs.push(avail[Math.floor(Math.random()*avail.length)].id); }
+  else if(c.pool==='trap'){ ai.traps = ai.traps.filter(x=>x!==c.id); const avail=ALL_TRAPS.filter(x=>!ai.traps.includes(x.id)); if(avail.length) ai.traps.push(avail[Math.floor(Math.random()*avail.length)].id); }
+}
+function openDeckSelect(mode){
+  DS = { mode, mine:{monsters:[],events:[],buffs:[],debuffs:[],traps:[],skill:null}, ai:null, conflicts:[], pendingConfirm:false };
+  DS_CONFLICT_IDX = 0;
+  $('#deck-select-overlay').classList.remove('hidden');
+  renderDSPools(); renderDSMine();
+}
+function confirmDeckSelect(){
+  const err = validateDS();
+  if(err){ toast(err); return; }
+  // 单机：AI 选卡
+  if(DS.mode==='solo'){
+    DS.ai = aiSelectDeck();
+    DS.conflicts = findConflicts();
+    if(DS.conflicts.length>0){
+      DS_CONFLICT_IDX = 0;
+      resolveNextConflict();
+    }else{
+      DECK_SELECT = { P:DS.mine, AI:DS.ai };
+      $('#deck-select-overlay').classList.add('hidden');
+      startSoloAfterSelect();
+    }
+  }else if(DS.mode==='host'){
+    // 联机：等待对手选卡，简化处理：直接开始（联机选卡同步可后续扩展）
+    DECK_SELECT = { P:DS.mine, AI:DS.mine };
+    $('#deck-select-overlay').classList.add('hidden');
+    startHostAfterSelect();
+  }
+}
+/* 选卡完成后的开始流程（替代原 startSolo/startHost 的前半部分） */
+function startSoloAfterSelect(){
   $('#menu-overlay').classList.add('hidden');
-  resetGame(); // 先初始化 G（与联机开房一致），再标记为单机模式
+  resetGame();
   G.net = G.net || {};
   G.net.mode = 'solo';
   startGame();
 }
-async function startHost(){
+function startHostAfterSelect(){
+  // 联机主机选卡完成后的流程
   const st = $('#menu-status');
   st.textContent = '正在创建房间…'; st.className='menu-status';
-  resetGame(); // 先初始化 G，netConnect 才能挂载连接状态
-  const r = await netConnect('host', null, $('#menu-name').value.trim());
-  if(r.err){ st.textContent = r.err; st.className='menu-status err'; return; }
+  resetGame();
+  netConnect('host', null, $('#menu-name').value.trim()).then(r=>{
+    if(r.err){ st.textContent = r.err; st.className='menu-status err'; return; }
+    $('#menu-overlay').classList.add('hidden');
+    G.net.mode='host';
+    G.net.roomId = r.roomId;
+    initDiceVars();
+    startDice();
+    setHint('房间号 '+r.roomId+'：等待对手加入后开始掷骰');
+    const dv = $('#dice-verdict'); if(dv) dv.textContent = '房间号：'+r.roomId+' —— 等待对手加入…';
+  });
+}
+
+function startSolo(){
   $('#menu-overlay').classList.add('hidden');
-  G.net.mode='host';
-  G.net.roomId = r.roomId;
-  initDiceVars();
-  startDice();
-  setHint('房间号 '+r.roomId+'：等待对手加入后开始掷骰');
-  const dv = $('#dice-verdict'); if(dv) dv.textContent = '房间号：'+r.roomId+' —— 等待对手加入…';
-  const go = $('#dice-go'); go.classList.add('hidden');
-  const btn = $('#dice-btn'); if(btn){ btn.disabled = true; btn.textContent='等待对手…'; }
+  openDeckSelect('solo');
+}
+async function startHost(){
+  $('#menu-overlay').classList.add('hidden');
+  openDeckSelect('host');
 }
 async function startJoin(){
   const st = $('#menu-status');
@@ -6408,6 +6966,10 @@ $('#menu-solo').addEventListener('click', startSolo);
 $('#menu-host').addEventListener('click', startHost);
 $('#menu-join-btn').addEventListener('click', startJoin);
 $('#menu-room').addEventListener('keydown', e=>{ if(e.key==='Enter') startJoin(); });
+/* 战前选卡界面按钮绑定 */
+$('#ds-confirm').addEventListener('click', confirmDeckSelect);
+$('#ds-cancel').addEventListener('click', ()=>{ $('#deck-select-overlay').classList.add('hidden'); showMenu(); });
+$('#ds-dice-roll').addEventListener('click', dsRollDice);
 
 /* 启动 */
 $('#record').innerHTML = recHtml();
